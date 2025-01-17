@@ -1,0 +1,24 @@
+name: Refresh Red Hat Token
+
+on:
+  schedule:
+    # Approximate 25-day intervals with specific days of the month
+    - cron: "0 0 1,26 * *" # Runs on the 1st and 26th of every month at midnight UTC
+
+  workflow_dispatch: # Allows manual runs as well
+
+jobs:
+  refresh-token:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Refresh Red Hat Token
+        env:
+          REFRESH_TOKEN: ${{ secrets.REFRESH_TOKEN }} # Add your refresh token as a secret
+        run: |
+          echo "Refreshing token..."
+          curl "https://sso.redhat.com/auth/realms/redhat-external/protocol/openid-connect/token" \
+            -d grant_type=refresh_token \
+            -d client_id="cloud-services" \
+            -d refresh_token="$REFRESH_TOKEN" \
+            --fail --silent --show-error --output /dev/null
