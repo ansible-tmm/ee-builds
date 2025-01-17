@@ -5,7 +5,7 @@ collections:
   - amazon.cloud
   - community.aws
   - community.general
-  - community.docker 
+  - community.docker
   - ansible.utils
   - ansible.posix
   - ansible.netcommon
@@ -14,9 +14,7 @@ collections:
   - containers.podman
   - community.crypto
   - azure.azcollection
-  - kubernetes.core
   - redhat.rhel_system_roles
   - fedora.linux_system_roles
   - f5networks.f5_modules
   - f5networks.f5_bigip
-
