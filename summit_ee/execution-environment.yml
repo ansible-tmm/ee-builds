@@ -10,7 +10,7 @@ dependencies:
   system: bindep.txt
 
 additional_build_files:
-  # Can be used to resolve collections from private automation hub
+  # Can be used to resolve collections from private automation hub - TEST
   - src: ansible.cfg
     dest: configs
 
