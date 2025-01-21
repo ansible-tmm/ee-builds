@@ -48,6 +48,13 @@ jobs:
       matrix: ${{fromJson(needs.prepare-matrix.outputs.matrix)}}
       fail-fast: false
     steps:
+      - name: Checkout repo
+        uses: actions/checkout@v2
+        with:
+          repository: ${{ github.event.pull_request.head.repo.full_name }}
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.ref != '' && github.event.pull_request.head.ref || 'main' }}
+
       - name: Print working directory
         run: pwd
 
