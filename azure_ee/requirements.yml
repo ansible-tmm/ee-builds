@@ -1,0 +1,9 @@
+---
+collections:
+  - name: azure.azcollection
+  - name: ansible.controller
+  - name: ansible.platform
+  - name: ansible.hub
+  - name: ansible.utils
+  - name: ansible.posix
+  - name: awx.awx
