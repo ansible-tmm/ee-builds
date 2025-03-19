@@ -1,0 +1,24 @@
+---
+collections:
+## certified collections matching aap25/ee-supported-rhel8
+  - name: ansible.posix                   
+  - name: ansible.scm                     
+  - name: ansible.snmp                    
+  - name: ansible.utils                  
+  - name: ansible.yang                    
+  - name: ansible.controller
+    version: 4.6.9
+  - name: ansible.platform
+    version: 2.5.20250312
+  - name: ansible.eda
+    version: 2.6.0
+  - name: ansible.hub
+    version: 1.0.0
+  - name: kubernetes.core
+  - name: kubevirt.core
+  - name: redhat.openshift
+    version: 4.0.1
+  - name: redhat.openshift_virtualization
+    version: 2.1.0
+  - name: redhat.rhel_system_roles
+    version: 1.88.9
