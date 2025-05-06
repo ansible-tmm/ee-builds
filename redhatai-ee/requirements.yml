@@ -1,6 +1,3 @@
 ---
 collections:
-  # - name: redhat.ai
-  # - name: infra.ai
-  - name: amazon.aws
-  - name: netapp.ontap
+  - name: infra.ai
