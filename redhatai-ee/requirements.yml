@@ -1,6 +1,4 @@
 ---
 collections:
   - name: redhat.ai
-    version: 1.0.0
   - name: infra.ai
-    version: 1.0.0
