@@ -1,4 +1,7 @@
 ---
+build_arg_defaults:
+  ANSIBLE_GALAXY_CLI_COLLECTION_OPTS: '--pre'
+
 version: 3
 images:
   base_image:
