@@ -8,10 +8,6 @@ dependencies:
   galaxy: requirements.yml
   python: requirements.txt
   system: bindep.txt
-  ansible_core:
-    package_pip: ansible-core
-  ansible_runner:
-    package_pip: ansible-runner
 
 additional_build_files:
   # Can be used to resolve collections from private automation hub
