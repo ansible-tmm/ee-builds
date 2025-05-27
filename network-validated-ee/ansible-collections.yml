@@ -3,8 +3,7 @@ collections:
 ## certified collections matching aap25/ee-supported-rhel8
   - name: ansible.network
   - name: network.base
-  - name: network.reports
+  - name: https://github.com/ansible-network/network.reports.git
     type: git
-    source: https://github.com/ansible-network/network.reports.git
     version: main
     
