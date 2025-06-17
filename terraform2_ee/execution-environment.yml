@@ -3,11 +3,15 @@ version: 3
 images:
   base_image:
     name: registry.redhat.io/ansible-automation-platform-25/ee-minimal-rhel8:latest
-#
+
 dependencies:
   galaxy: requirements.yml
   python: requirements.txt
   system: bindep.txt
+  ansible_core:
+    package_pip: ansible-core
+  ansible_runner:
+    package_pip: ansible-runner
 
 additional_build_files:
   # Can be used to resolve collections from private automation hub
