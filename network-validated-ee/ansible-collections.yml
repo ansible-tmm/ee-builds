@@ -8,6 +8,7 @@ collections:
  - name: cisco.nxos
  - name: vyos.vyos
  - name: arista.eos
+ - name: arubanetworks.aoscx
  - name: git+https://github.com/redhat-cop/network.base
  - name: git+https://github.com/redhat-cop/network.backup
  - name: git+https://github.com/redhat-cop/network.ospf
