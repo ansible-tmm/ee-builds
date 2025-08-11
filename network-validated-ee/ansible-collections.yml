@@ -1,10 +1,19 @@
----
 collections:
-## certified collections matching aap25/ee-supported-rhel8
-  - name: ansible.network
-  - name: network.base
-  - name: network.reports
-    type: git
-    source: https://github.com/ansible-network/network.reports.git
-    version: main
-    
+ - name: ansible.netcommon
+ - name: ansible.scm
+ - name: ansible.utils
+ - name: junipernetworks.junos
+ - name: cisco.ios
+ - name: cisco.iosxr
+ - name: cisco.nxos
+ - name: vyos.vyos
+ - name: arista.eos
+ - name: arista.avd
+ - name: arubanetworks.aoscx
+ - name: network.base
+ - name: network.backup
+ - name: network.ospf
+ - name: network.bgp
+ - name: network.interfaces
+ - name: network.inventory_reports
+ - name: network.healthchecks
