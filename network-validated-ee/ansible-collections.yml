@@ -10,10 +10,10 @@ collections:
  - name: arista.eos
  - name: arista.avd
  - name: arubanetworks.aoscx
- - name: git+https://github.com/redhat-cop/network.base
- - name: git+https://github.com/redhat-cop/network.backup
- - name: git+https://github.com/redhat-cop/network.ospf
- - name: git+https://github.com/redhat-cop/network.bgp
- - name: git+https://github.com/redhat-cop/network.interfaces
- - name: git+https://github.com/ansible-network/network.reports
- - name: git+https://github.com/ansible-network/network.healthchecks
+ - name: network.base
+ - name: network.backup
+ - name: network.ospf
+ - name: network.bgp
+ - name: network.interfaces
+ - name: network.inventory_reports
+ - name: network.healthchecks
