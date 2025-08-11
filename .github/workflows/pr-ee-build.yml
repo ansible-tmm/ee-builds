@@ -5,10 +5,11 @@ on:
     branches:
       - main
     types: [opened, reopened, synchronize]
+  workflow_dipatch:
 
 jobs:
   prepare-matrix:
-    runs-on: ubuntu-latest  
+    runs-on: ubuntu-latest
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
       length: ${{ steps.set-matrix.outputs.length }}
@@ -20,7 +21,7 @@ jobs:
         fetch-depth: 0
         ref: ${{ github.event.pull_request.head.ref != '' && github.event.pull_request.head.ref || 'main' }}
 
-    - name: Generate matrix  
+    - name: Generate matrix
       id: generate-matrix
       run: |
         echo $GITHUB_BASE_REF
