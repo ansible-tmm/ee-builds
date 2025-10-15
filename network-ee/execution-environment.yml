@@ -3,7 +3,7 @@
 version: 3
 images:
   base_image:
-    name: 'ansible-automation-platform-26/ee-minimal-rhel9'
+    name: 'ansible-automation-platform-26/ee-minimal-rhel9:latest'
 
 additional_build_files:
     # Can be used to resolve collections from private automation hub
