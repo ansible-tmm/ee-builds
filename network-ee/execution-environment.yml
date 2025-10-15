@@ -13,15 +13,7 @@ additional_build_files:
 dependencies:
   galaxy: requirements.yml
   python: requirements.txt
-  system: |
-    # Ensure pip exists for whichever Python RPM becomes /usr/bin/python3 (UBI installs 3.9)
-    python3-pip [platform:rhel-9 platform:centos-9]
-    # Optional but recommended for network collections that compile wheels
-    gcc [platform:rhel-9]
-    libssh-devel [platform:rhel-9]
-    python3-cryptography [platform:rhel-9]
-    python3-lxml [platform:rhel-9]
-    rsync [platform:rhel-9]  
+  system: bindep.txt
 
 options:
     package_manager_path: /usr/bin/microdnf
