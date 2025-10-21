@@ -18,6 +18,7 @@ options:
 
 additional_build_steps:
     prepend_base:
+        - RUN dnf remove -y --noautoremove python3-typing-extensions
         - RUN $PYCMD -m pip install --upgrade pip setuptools
     prepend_galaxy:
         # Add custom ansible.cfg which defines collection install sources
