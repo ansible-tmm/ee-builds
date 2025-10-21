@@ -14,12 +14,9 @@ collections:
   - name: cloud.common
   - name: containers.podman
   - name: fedora.linux_system_roles
-  - name: frr.frr
   - name: ibm.qradar
   - name: infra.controller_configuration
   - name: junipernetworks.junos
-  - name: kubernetes.core
-  - name: openvswitch.openvswitch
   - name: servicenow.itsm
   - name: splunk.es
   - name: trendmicro.deepsec
@@ -29,3 +26,5 @@ collections:
     version: ">=4.6.2"
   - name: ansible.platform
     version: ">=2.5.3"
+  - name: network.base
+  - name: network.inventory_reports
