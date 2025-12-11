@@ -3,7 +3,7 @@ collections:
   - name: amazon.aws
   - name: amazon.cloud
   - name: community.aws
-  - name: ansible.controller
+#  - name: ansible.controller
   - name: ansible.platform
   - name: ansible.posix
   - name: awx.awx
