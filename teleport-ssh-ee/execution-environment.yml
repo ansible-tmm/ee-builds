@@ -5,7 +5,6 @@ images:
     name: 'registry.redhat.io/ansible-automation-platform-26/ee-minimal-rhel9:latest'
 
 additional_build_files:
-    # Can be used to resolve collections from private automation hub
     - src: ansible.cfg
       dest: configs
 
