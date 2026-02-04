@@ -80,7 +80,7 @@ jobs:
 
       - name: Substitute token for automation hub
         run: |
-          sed -i "s/my_ah_token/${{ secrets.AH_TOKEN }}/1" ansible.cfg
+          sed -i "s/my_ah_token/${{ secrets.AH_TOKEN }}/g" ansible.cfg
 
       - name: (devel) Build image and create artifact
         run: |

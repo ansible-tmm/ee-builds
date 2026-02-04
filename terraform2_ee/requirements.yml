@@ -8,7 +8,5 @@ collections:
   - name: ansible.posix
   - name: awx.awx
   - name: cloud.terraform
-  - name: hashicorp.terraform
-  - name: hashicorp.vault
+    version: 3.0.0
   - name: google.cloud
-  - name: azure.azcollection
