@@ -1,0 +1,31 @@
+[Unit]
+Description=Teleport Machine ID Bot for sean-test.teleport.sh
+Documentation=https://goteleport.com/docs/machine-id/introduction/
+After=network.target
+
+[Service]
+Type=simple
+User=root
+Group=root
+Restart=always
+RestartSec=5
+
+# Path to tbot binary (adjust if different)
+ExecStart=/usr/local/bin/tbot start -c /var/lib/teleport-bot/sean-test.teleport.sh/tbot.yaml
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=tbot-sean-test
+
+# Security hardening
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ReadWritePaths=/var/lib/teleport-bot/sean-test.teleport.sh
+
+# Resource limits (optional)
+LimitNOFILE=8192
+
+[Install]
+WantedBy=multi-user.target

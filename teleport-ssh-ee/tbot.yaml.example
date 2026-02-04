@@ -1,0 +1,31 @@
+version: v2
+
+# Teleport proxy server address
+proxy_server: sean-test.teleport.sh:443
+
+# Bot authentication
+onboarding:
+  join_method: token
+  # IMPORTANT: Replace with your actual bot token from Teleport
+  # Generate with: tctl bots add ansible-aap-bot --roles=<your-role>
+  token: YOUR_TELEPORT_BOT_TOKEN_HERE
+
+# Bot state storage (internal use, needs to be writable by tbot)
+storage:
+  type: directory
+  path: /var/lib/teleport-bot/sean-test.teleport.sh/data
+
+# Certificate outputs
+destinations:
+  - type: directory
+    path: /var/lib/teleport-bot/sean-test.teleport.sh/out
+    configs:
+      # Generates SSH client config with certificate-based auth
+      - ssh_client
+
+# Optional: Enable debug logging
+# debug: true
+
+# Optional: Custom certificate renewal settings
+# renewal_interval: 20m
+# certificate_ttl: 1h

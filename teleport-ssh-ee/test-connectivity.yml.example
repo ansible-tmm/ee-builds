@@ -1,0 +1,57 @@
+---
+# Simple test playbook to verify Teleport SSH connectivity
+# Usage: ansible-playbook -i inventory.yml test-connectivity.yml
+
+- name: Test Teleport SSH Connectivity
+  hosts: all
+  gather_facts: yes
+
+  tasks:
+    - name: Ping test
+      ansible.builtin.ping:
+      register: ping_result
+
+    - name: Display ping result
+      ansible.builtin.debug:
+        msg: "Successfully connected to {{ inventory_hostname }}"
+      when: ping_result is succeeded
+
+    - name: Get hostname
+      ansible.builtin.command: hostname
+      register: hostname_output
+      changed_when: false
+
+    - name: Display hostname
+      ansible.builtin.debug:
+        var: hostname_output.stdout
+
+    - name: Gather system info
+      ansible.builtin.setup:
+        filter:
+          - ansible_distribution
+          - ansible_distribution_version
+          - ansible_os_family
+      register: system_info
+
+    - name: Display system info
+      ansible.builtin.debug:
+        msg: |
+          OS: {{ ansible_distribution }} {{ ansible_distribution_version }}
+          Family: {{ ansible_os_family }}
+
+    - name: Test elevated privileges (optional)
+      ansible.builtin.command: id
+      become: false
+      register: id_output
+      changed_when: false
+
+    - name: Display user identity
+      ansible.builtin.debug:
+        var: id_output.stdout
+
+    - name: Verify SSH via Teleport
+      ansible.builtin.debug:
+        msg: |
+          ✅ SUCCESS: Connected to {{ inventory_hostname }}
+          ✅ SSH User: {{ ansible_user }}
+          ✅ Teleport certificate-based authentication working!

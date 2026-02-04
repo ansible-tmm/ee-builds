@@ -1,0 +1,18 @@
+# System packages required for Teleport SSH EE
+
+# Needed so /usr/bin/python3 (3.9) has pip after microdnf changes the default
+python3-pip [platform:rhel-9]
+
+# RHEL/UBI base development tools
+python3-devel [platform:rpm]
+gcc            [platform:rpm]
+redhat-rpm-config [platform:rpm]
+
+# OpenSSH client - REQUIRED for Ansible SSH connection plugin
+openssh-clients [platform:rpm]
+
+# Kerberos support (optional, for environments using Kerberos)
+krb5-devel     [platform:rpm]
+
+# Curl for downloading Teleport (already in most images, but explicit)
+curl [platform:rpm]

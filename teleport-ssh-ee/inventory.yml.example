@@ -1,0 +1,46 @@
+---
+# Example Ansible inventory for Teleport-managed hosts
+#
+# IMPORTANT:
+# - Host names MUST use full Teleport FQDN: <node-name>.<cluster-name>
+# - ansible_user must match Teleport login granted to your bot
+
+all:
+  children:
+    # Group for Teleport-managed production web servers
+    teleport_web_prod:
+      hosts:
+        webserver01.sean-test.teleport.sh:
+          ansible_user: ec2-user
+        webserver02.sean-test.teleport.sh:
+          ansible_user: ec2-user
+      vars:
+        ansible_user: ec2-user
+        environment: production
+
+    # Group for Teleport-managed database servers
+    teleport_db_prod:
+      hosts:
+        database01.sean-test.teleport.sh:
+          ansible_user: ec2-user
+        database02.sean-test.teleport.sh:
+          ansible_user: ec2-user
+      vars:
+        ansible_user: ec2-user
+        environment: production
+
+    # Group for staging environment
+    teleport_staging:
+      hosts:
+        staging01.sean-test.teleport.sh:
+          ansible_user: ubuntu
+        staging02.sean-test.teleport.sh:
+          ansible_user: ubuntu
+      vars:
+        ansible_user: ubuntu
+        environment: staging
+
+  vars:
+    # Global variables
+    ansible_python_interpreter: /usr/bin/python3
+    # No ansible_ssh_private_key_file needed - using Teleport certs!
