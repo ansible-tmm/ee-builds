@@ -96,7 +96,9 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v2
         with:
+          repository: ${{ github.event.pull_request.head.repo.full_name }}
           fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.ref != '' && github.event.pull_request.head.ref || 'main' }}
 
       - name: Install python requirements (ansible-builder)
         run: pip install -r requirements.txt
