@@ -7,6 +7,4 @@ collections:
 
   # Controller/Platform integration
   - name: ansible.controller
-    version: ">=4.6.2"
   - name: ansible.platform
-    version: ">=2.5.3"
