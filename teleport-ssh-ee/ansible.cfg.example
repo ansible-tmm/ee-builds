@@ -1,0 +1,33 @@
+[defaults]
+# Basic Ansible configuration for Teleport SSH
+host_key_checking = False
+inventory = inventory/hosts.yml
+
+# Optimize for network operations
+forks = 10
+timeout = 30
+
+# Callback plugins (optional)
+callback_plugins = ~/.ansible/plugins/callback:/usr/share/ansible/plugins/callback
+stdout_callback = yaml
+
+[ssh_connection]
+# CRITICAL: Use Teleport-generated SSH config
+# This config includes certificate-based authentication and ProxyCommand
+ssh_args = -F /teleport-bot/sean-test.teleport.sh.ssh_config
+
+# SSH optimization
+pipelining = True
+control_path = /tmp/ansible-ssh-%%h-%%p-%%r
+control_path_dir = /tmp
+
+# Connection timeouts
+connect_timeout = 30
+connect_retry_timeout = 15
+
+[privilege_escalation]
+become = False
+# If you need sudo, set become = True and configure become_method
+# become_method = sudo
+# become_user = root
+# become_ask_pass = False

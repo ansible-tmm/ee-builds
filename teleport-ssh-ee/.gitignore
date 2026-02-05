@@ -1,0 +1,50 @@
+# Teleport SSH EE - Git Ignore
+
+# CRITICAL: Never commit these
+token
+*.token
+tbot.yaml
+!tbot.yaml.example
+
+# Ansible builder artifacts
+context/
+_build/
+
+# Local testing
+.env
+.env.local
+*.local
+
+# Secrets
+secrets/
+vault/
+*.key
+*.pem
+id_rsa*
+id_ed25519*
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Test outputs
+test-output/

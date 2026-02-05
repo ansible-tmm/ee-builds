@@ -1,0 +1,10 @@
+---
+collections:
+  # Core Ansible collections for Linux automation
+  - name: ansible.posix
+  - name: ansible.utils
+  - name: community.general
+
+  # Controller/Platform integration
+  - name: ansible.controller
+  - name: ansible.platform
