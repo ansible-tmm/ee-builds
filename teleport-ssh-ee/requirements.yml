@@ -8,3 +8,4 @@ collections:
   # Controller/Platform integration
   - name: ansible.controller
   - name: ansible.platform
+  # adding some text here to test the build
