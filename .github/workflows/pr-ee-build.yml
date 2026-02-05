@@ -85,8 +85,8 @@ jobs:
   build-ee:
     needs: [prepare-matrix]
     if: ${{ needs.prepare-matrix.outputs.length != '0' }}
-    outputs:
-      push_success: ${{ steps.push_to_ghcr.outputs.push_success }}
+    # outputs:
+    #   push_success: ${{ steps.push_to_ghcr.outputs.push_success }}
     runs-on: ubuntu-latest
     environment: test
     strategy:
@@ -108,14 +108,14 @@ jobs:
           echo "EE=${{ matrix.ee }}" >> $GITHUB_ENV
           SHORT_SHA=$(echo ${{ github.sha }} | cut -c1-7)
           echo "IMAGE_TAG=pr-${{ github.event.number }}-$SHORT_SHA" >> $GITHUB_ENV
-          echo "IMAGE_REGISTRY=ghcr.io" >> $GITHUB_ENV
 
-      - name: Login to ghcr
-        uses: redhat-actions/podman-login@v1
-        with:
-          registry: ${{ env.IMAGE_REGISTRY }}
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+      # Login to ghcr not needed for PR builds since we don't push
+      # - name: Login to ghcr
+      #   uses: redhat-actions/podman-login@v1
+      #   with:
+      #     registry: ghcr.io
+      #     username: ${{ github.actor }}
+      #     password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Log in to registry.redhat.io
         uses: redhat-actions/podman-login@v1
@@ -142,9 +142,10 @@ jobs:
           echo "" >> $COMMANDS_FILE
           echo "${{ env.EE }}" >> $COMMANDS_FILE
           echo "" >> $COMMANDS_FILE
-          echo "\`\`\`" > $COMMANDS_FILE
-          echo "podman pull ${{ env.IMAGE_REGISTRY }}/${{ github.repository_owner }}/${{ env.EE }}:${{ env.IMAGE_TAG }}" >> $COMMANDS_FILE
-          echo "\`\`\`" >> $COMMANDS_FILE
+          echo "**Build Status:** ✅ Success" >> $COMMANDS_FILE
+          echo "" >> $COMMANDS_FILE
+          echo "_Image built locally but not pushed to registry for PR builds_" >> $COMMANDS_FILE
+          echo "" >> $COMMANDS_FILE
           echo "<details>" >> $COMMANDS_FILE
           echo "<summary><b>More info...</b></summary>" >> $COMMANDS_FILE
           echo "" >> $COMMANDS_FILE
@@ -167,23 +168,25 @@ jobs:
           name: commands-${{ matrix.ee }}
           path: ${{ matrix.ee }}/commands-${{ matrix.ee }}.txt
 
-      - name: Push To GHCR
-        id: push_to_ghcr
-        uses: redhat-actions/push-to-registry@v2
-        with:
-          image: ${{ env.EE }}
-          tags: ${{ env.IMAGE_TAG }}
-          registry: ${{ env.IMAGE_REGISTRY }}/${{ github.repository_owner }}
+      # Disabled for PR builds - images are only pushed when merged to main
+      # - name: Push To GHCR
+      #   id: push_to_ghcr
+      #   uses: redhat-actions/push-to-registry@v2
+      #   with:
+      #     image: ${{ env.EE }}
+      #     tags: ${{ env.IMAGE_TAG }}
+      #     registry: ${{ env.IMAGE_REGISTRY }}/${{ github.repository_owner }}
 
-      - name: Set push success flag
-        if: success()
-        run: echo "push_success=true" >> $GITHUB_ENV
+      # - name: Set push success flag
+      #   if: success()
+      #   run: echo "push_success=true" >> $GITHUB_ENV
 
       - name: Print summary
         run: |
-          echo "## :rocket: Usage" >> $GITHUB_STEP_SUMMARY
-          echo "Image pushed to repository: ${{ env.IMAGE_REGISTRY }}/${{ github.repository_owner }}/${{ env.EE }}:${{ env.IMAGE_TAG }}" >> $GITHUB_STEP_SUMMARY
-          echo "> \`podman pull ${{ env.IMAGE_REGISTRY }}/${{ github.repository_owner }}/${{ env.EE }}:${{ env.IMAGE_TAG }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "## :rocket: Build Complete" >> $GITHUB_STEP_SUMMARY
+          echo "Image built successfully: ${{ env.EE }}:${{ env.IMAGE_TAG }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "_Note: Images are not pushed to ghcr.io for PR builds. They will be pushed when merged to main._" >> $GITHUB_STEP_SUMMARY
 
   post-comment:
     needs: build-ee
