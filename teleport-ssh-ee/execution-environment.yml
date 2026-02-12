@@ -32,14 +32,7 @@ additional_build_steps:
     append_final:
         # Install Teleport tbot/tsh binaries directly (install script requires yum/dnf)
         # Dependencies (curl-minimal, tar, gzip) are in bindep.txt
-        - RUN curl -fsSL -o /tmp/teleport.tar.gz https://cdn.teleport.dev/teleport-v17.1.5-linux-amd64-bin.tar.gz && \
-          tar -xzf /tmp/teleport.tar.gz -C /tmp && \
-          cp /tmp/teleport/tbot /usr/local/bin/tbot && \
-          cp /tmp/teleport/tsh /usr/local/bin/tsh && \
-          chmod 755 /usr/local/bin/tbot /usr/local/bin/tsh && \
-          rm -rf /tmp/teleport /tmp/teleport.tar.gz && \
-          echo "Teleport installed:" && \
-          tbot version && tsh version
+        - RUN curl -fsSL -o /tmp/teleport.tar.gz https://cdn.teleport.dev/teleport-v17.1.5-linux-amd64-bin.tar.gz && tar -xzf /tmp/teleport.tar.gz -C /tmp && cp /tmp/teleport/tbot /usr/local/bin/tbot && cp /tmp/teleport/tsh /usr/local/bin/tsh && chmod 755 /usr/local/bin/tbot /usr/local/bin/tsh && rm -rf /tmp/teleport /tmp/teleport.tar.gz && tbot version && tsh version
         # Create the mount point directory for Teleport bot certificates
         - RUN mkdir -p /teleport-bot && chmod 755 /teleport-bot
         # Default Teleport cluster (example - override in your ansible.cfg)
