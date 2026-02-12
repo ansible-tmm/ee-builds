@@ -14,4 +14,7 @@ openssh-clients [platform:rpm]
 # Kerberos support (optional, for environments using Kerberos)
 krb5-devel     [platform:rpm]
 
-# Note: curl-minimal is already in base image and sufficient for Teleport install
+# Required for Teleport installation
+curl-minimal [platform:rpm]
+tar [platform:rpm]
+gzip [platform:rpm]
