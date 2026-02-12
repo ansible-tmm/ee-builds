@@ -33,7 +33,7 @@ additional_build_steps:
         # Install Teleport tbot binary into the EE
         # This is required for ProxyCommand in SSH config
         # Dependencies (curl-minimal, tar, gzip) are in bindep.txt
-        - RUN curl -fsSL https://cdn.teleport.dev/install-v17.sh | bash -s 17.1.5 && \
+        - RUN curl -fsSL https://cdn.teleport.dev/install.sh | bash -s 17.1.5 oss && \
           echo "Teleport installed:" && \
           ls -la /usr/local/bin/tbot /usr/local/bin/tsh || exit 1
         # Create the mount point directory for Teleport bot certificates
