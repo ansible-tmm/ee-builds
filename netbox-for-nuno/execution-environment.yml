@@ -20,6 +20,10 @@ additional_build_steps:
     prepend_base:
         - ENV PIP_IGNORE_INSTALLED=1
         - RUN $PYCMD -m pip install --upgrade pip setuptools
+    prepend_builder:
+        # Pin PYCMD to python3.12 so that microdnf installing python3-3.9
+        # (as a dependency) does not hijack /usr/bin/python3 and break pip
+        - ENV PYCMD=/usr/bin/python3.12
     prepend_galaxy:
         # Add custom ansible.cfg which defines collection install sources
         - ADD _build/configs/ansible.cfg /etc/ansible/ansible.cfg

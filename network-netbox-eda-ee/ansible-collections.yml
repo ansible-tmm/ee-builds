@@ -1,7 +1,18 @@
 ---
 collections:
 
-## certified collections matching aap25/ee-supported-rhel9
+## certified or galaxy netbox
+  - name: netbox.netbox
+    version: 3.21.0
+
+## community collections
+  - name: community.general
+#  - name: network.toolkit
+
+## validated collections
+
+
+## certified collections
   - name: ansible.netcommon               
 #    version: 7.1.0
   - name: ansible.network                 
@@ -24,14 +35,6 @@ collections:
 #    version: 9.0.2
   - name: junipernetworks.junos
 #    version: 9.1.0
-
-## certified or galaxy netbox
-  - name: netbox.netbox
-    version: 3.21.0
-
-## community collections
-  - name: community.general
-  - name: network.toolkit
 
 ## disabled collections, due to conflict or unneeded
 ## alt netbox source for devel branch
