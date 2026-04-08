@@ -1,6 +1,14 @@
 ---
 collections:
 
+# nunos
+  - name: cisco.ios
+  - name: arista.eos
+  - name: community.postgresql
+  - name: redhat.rhel_idm
+  - name: containers.podman
+  - name: ansible.controller
+
 ## certified or galaxy netbox
   - name: netbox.netbox
     version: 3.21.0
