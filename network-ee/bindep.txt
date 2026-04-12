@@ -2,7 +2,7 @@
 libxml2-devel [platform:rpm]
 libxslt-devel [platform:rpm]     # sometimes required by ovirt/lxml stack
 
-# Needed so /usr/bin/python3 (3.9) has pip after microdnf changes the default
+# Needed so /usr/bin/python3 has pip after microdnf changes the default
 python3-pip [platform:rhel-9]
 
 # RHEL/UBI
