@@ -1,8 +1,8 @@
 pip>=23.2
-setuptools>=65
+setuptools>=65,<81
 wheel>=0.40
 aiohttp
-ansible-pylibssh
+ansible-pylibssh>=1.2.2
 argcomplete
 asn1crypto
 async-timeout
