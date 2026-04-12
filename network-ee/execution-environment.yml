@@ -19,7 +19,8 @@ options:
 
 additional_build_steps:
     prepend_base:
-        - RUN $PYCMD -m pip install --upgrade pip 'setuptools>=65,<81'
+        - RUN $PYCMD -m pip install --upgrade pip 'setuptools>=65,<81' wheel
+        - ENV PIP_NO_BUILD_ISOLATION=1
     prepend_galaxy:
         # Add custom ansible.cfg which defines collection install sources
         - ADD _build/configs/ansible.cfg /etc/ansible/ansible.cfg
