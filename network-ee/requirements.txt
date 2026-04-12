@@ -36,7 +36,7 @@ lxml
 MarkupSafe
 multidict
 munch
-ncclient==0.6.13
+ncclient>=0.6.13
 netaddr
 netifaces
 ntlm-auth
