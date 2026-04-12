@@ -2,7 +2,7 @@
 version: 3
 images:
   base_image:
-    name: 'registry.redhat.io/ansible-automation-platform-26/ee-minimal-rhel9:latest'
+    name: 'registry.redhat.io/ansible-automation-platform-26/ee-supported-rhel9:latest'
 
 additional_build_files:
     # Can be used to resolve collections from private automation hub
@@ -13,9 +13,6 @@ dependencies:
   galaxy: requirements.yml
   python: requirements.txt
   system: bindep.txt
-  exclude:
-    python:
-      - ansible-core
 
 options:
     package_manager_path: /usr/bin/microdnf
