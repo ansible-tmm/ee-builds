@@ -14,6 +14,9 @@ dependencies:
   galaxy: requirements.yml
   python: requirements.txt
   system: bindep.txt
+  exclude:
+    python:
+      - ansible-core
 
 options:
     package_manager_path: /usr/bin/microdnf
