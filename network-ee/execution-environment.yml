@@ -20,6 +20,7 @@ additional_build_steps:
     prepend_base:
         - RUN $PYCMD -m ensurepip
         - ENV ANSIBLE_COLLECTIONS_ON_ANSIBLE_VERSION_MISMATCH=ignore
+        - ENV ANSIBLE_LIBSSH_PUBLICKEY_ALGORITHMS=ssh-rsa
     prepend_galaxy:
         - ADD _build/configs/ansible.cfg /etc/ansible/ansible.cfg
         - ARG AH_TOKEN
