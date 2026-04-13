@@ -1,0 +1,51 @@
+---
+description: Conventions and pitfalls for building Ansible Execution Environments in this repo
+globs: "**/execution-environment.yml,**/requirements.txt,**/bindep.txt,**/requirements.yml"
+alwaysApply: false
+---
+
+# Execution Environment Build Conventions
+
+## Base Image Selection
+
+- `ee-minimal-rhel9` does NOT include `ansible-core`. If collections require `ansible-core>=2.17.0`, pip will fail on Python 3.9 because PyPI has no 3.9-compatible wheel for 2.17+.
+- `ee-supported-rhel9` includes `ansible-core` pre-installed via RPM (and Python 3.12). Pip sees it as already satisfied. Use this when collections pin `ansible-core>=2.17`.
+- `ee-supported` also bundles extra collections (e.g. `ansible.eda`) whose dependencies (like `systemd-python`) need system headers in `bindep.txt`.
+- Prefer `:latest` tag over SHA digest pins unless reproducibility is critical — stale SHAs cause hard-to-debug Python version mismatches.
+
+## pip Build Isolation (Critical)
+
+Upgrading pip in `prepend_base` pulls in pip 26+, which enforces build isolation. Source-only packages (`ncclient`, `ovirt-engine-sdk-python`, `systemd-python`) fail with `No module named 'setuptools'` because the isolated build venv doesn't include it.
+
+**Fix**: Set `ENV PIP_NO_BUILD_ISOLATION=1` in `prepend_base` right after the pip/setuptools upgrade:
+
+```yaml
+prepend_base:
+    - RUN $PYCMD -m pip install --upgrade pip 'setuptools>=65,<81' wheel
+    - ENV PIP_NO_BUILD_ISOLATION=1
+```
+
+## setuptools Version Cap
+
+Cap setuptools below 81 (`setuptools>=65,<81`) in both `requirements.txt` AND `prepend_base`. Setuptools 81+ deprecated `pkg_resources`, which older packages (like `ansible-pylibssh<1.2.2`) import at runtime, producing noisy warnings during playbook execution.
+
+## ansible-builder Version
+
+The CI pins `ansible-builder==3.0.0` in the root `requirements.txt`. The `exclude` keyword under `dependencies` requires `>=3.1.0` but that version changed build isolation behavior and broke source-only packages. Don't upgrade without also addressing build isolation.
+
+## Common bindep.txt Entries for ee-supported
+
+When using `ee-supported-rhel9`, these system packages are needed for collection dependencies:
+
+```
+systemd-devel  [platform:rpm]   # systemd-python (from ansible.eda)
+pkgconf        [platform:rpm]   # pkg-config for C extension builds
+libxml2-devel  [platform:rpm]   # ovirt-engine-sdk-python / lxml
+python3-devel  [platform:rpm]   # any C extension compilation
+gcc            [platform:rpm]   # compiler for C extensions
+```
+
+## CI Workflow Gotchas
+
+- The `generate_matrix.py` script only builds EEs whose directories changed between `HEAD^1` and `HEAD`. If you change only root-level files (like `requirements.txt`), the EE build is skipped. Touch a file inside the EE directory to trigger it.
+- Automation hub 504 timeouts are transient — just rerun the workflow.
