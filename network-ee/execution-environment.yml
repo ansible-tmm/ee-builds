@@ -17,6 +17,8 @@ options:
     package_manager_path: /usr/bin/microdnf
 
 additional_build_steps:
+    prepend_base:
+        - RUN $PYCMD -m ensurepip
     prepend_galaxy:
         - ADD _build/configs/ansible.cfg /etc/ansible/ansible.cfg
         - ARG AH_TOKEN
