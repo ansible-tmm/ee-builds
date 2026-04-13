@@ -5,6 +5,10 @@ libxslt-devel [platform:rpm]     # sometimes required by ovirt/lxml stack
 # Needed so /usr/bin/python3 has pip after microdnf changes the default
 python3-pip [platform:rhel-9]
 
+# Needed for systemd-python C extension (from ansible.eda in ee-supported)
+systemd-devel  [platform:rpm]
+pkgconf        [platform:rpm]
+
 # RHEL/UBI
 python3-devel [platform:rpm]
 krb5-devel     [platform:rpm]
