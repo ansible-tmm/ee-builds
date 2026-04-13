@@ -5,7 +5,6 @@ images:
     name: 'registry.redhat.io/ansible-automation-platform-26/ee-supported-rhel9:latest'
 
 additional_build_files:
-    # Can be used to resolve collections from private automation hub
     - src: ansible.cfg
       dest: configs
 
@@ -18,17 +17,8 @@ options:
     package_manager_path: /usr/bin/microdnf
 
 additional_build_steps:
-    prepend_base:
-        - RUN $PYCMD -m pip install --upgrade pip 'setuptools>=65,<81' wheel
-        - RUN $PYCMD -m pip install --index-url https://pypi.org/simple/ 'ansible-core>=2.17.0'
-        - ENV PIP_NO_BUILD_ISOLATION=1
     prepend_galaxy:
-        # Add custom ansible.cfg which defines collection install sources
         - ADD _build/configs/ansible.cfg /etc/ansible/ansible.cfg
-        # AH_TOKEN is passed into the build command using a --build-arg
-        # accept this as an ARG during this stage to reference later
         - ARG AH_TOKEN
-        # Use the above ARG to define an environment variable holding
-        # the token for resolving private collections
         - ENV ANSIBLE_GALAXY_SERVER_AUTOMATION_HUB_TOKEN=$AH_TOKEN
         - ENV ANSIBLE_GALAXY_SERVER_AUTOMATION_HUB_VALIDATED_TOKEN=$AH_TOKEN
