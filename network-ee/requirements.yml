@@ -1,30 +1,18 @@
 ---
+# Only collections NOT already in ee-supported-rhel9.
+# Do NOT add collections the base image ships (e.g. cisco.ios, arista.eos,
+# ansible.netcommon, ansible.utils, ansible.controller, ansible.platform)
+# — overriding them pulls in versions that conflict with the shipped
+# ansible-core and produces runtime warnings.
 collections:
-  - name: amazon.aws
-  - name: ansible.netcommon
-  - name: ansible.network
-  - name: ansible.posix
-  - name: ansible.security
-  - name: ansible.utils
-  - name: arista.eos
   - name: cisco.asa
-  - name: cisco.ios
-  - name: cisco.iosxr
-  - name: cisco.nxos
-  - name: cloud.common
   - name: containers.podman
   - name: fedora.linux_system_roles
   - name: ibm.qradar
   - name: infra.controller_configuration
-  - name: junipernetworks.junos
-  - name: servicenow.itsm
   - name: splunk.es
   - name: trendmicro.deepsec
   - name: vmware.vmware_rest
   - name: vyos.vyos
-  - name: ansible.controller
-    version: ">=4.6.2"
-  - name: ansible.platform
-    version: ">=2.5.3"
   - name: network.base
   - name: network.inventory_reports
