@@ -1,0 +1,31 @@
+---
+description: Known issues and decisions specific to the network-ee execution environment
+globs: "network-ee/**"
+alwaysApply: false
+---
+
+# network-ee Specifics
+
+## Purpose
+
+Used by the Ansible Network Automation Workshop (rhpds/zt-network-automation-workshop). Students see all output, so warnings in playbook runs are confusing and should be eliminated.
+
+## pkg_resources Deprecation Warning (Fixed)
+
+`ansible-pylibssh<1.2.2` imports `pkg_resources` at runtime, producing:
+```
+/usr/lib64/python3.9/site-packages/pylibsshext/_version.py:15: UserWarning: pkg_resources is deprecated as an API.
+```
+**Fix**: Pin `ansible-pylibssh>=1.2.2` (uses `importlib.metadata` instead).
+
+## Why ee-supported Instead of ee-minimal
+
+Collections `ansible.controller>=4.6.2` and `ansible.platform>=2.5.3` require `ansible-core>=2.17.0`. The `ee-minimal-rhel9` image has Python 3.9 where ansible-core 2.17+ cannot be pip-installed (no PyPI wheel). The `ee-supported-rhel9` image ships ansible-core via RPM on Python 3.12, satisfying the requirement.
+
+## ncclient Pin
+
+`ncclient==0.6.13` is pinned because it's the last version validated with the Juniper/Cisco/Arista collection stack in this workshop. Don't unpin without testing network module compatibility.
+
+## Collections
+
+Core network collections: `cisco.ios`, `arista.eos`, `junipernetworks.junos`, `ansible.netcommon`, `ansible.utils`. Also includes `ansible.controller` and `ansible.platform` for AAP integration.
