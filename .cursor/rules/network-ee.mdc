@@ -10,22 +10,20 @@ alwaysApply: false
 
 Used by the Ansible Network Automation Workshop (rhpds/zt-network-automation-workshop). Students see all output, so warnings in playbook runs are confusing and should be eliminated.
 
-## pkg_resources Deprecation Warning (Fixed)
+## Base Image: ee-supported-rhel9
 
-`ansible-pylibssh<1.2.2` imports `pkg_resources` at runtime, producing:
-```
-/usr/lib64/python3.9/site-packages/pylibsshext/_version.py:15: UserWarning: pkg_resources is deprecated as an API.
-```
-**Fix**: Pin `ansible-pylibssh>=1.2.2` (uses `importlib.metadata` instead).
+Collections require `ansible-core>=2.17.0`. `ee-minimal-rhel9` (Python 3.9) can't satisfy this. `ee-supported-rhel9` (Python 3.12, ansible-core 2.15.x RPM) works with pre-bundled collections.
 
-## Why ee-supported Instead of ee-minimal
+## Delta-Only Dependencies
 
-Collections `ansible.controller>=4.6.2` and `ansible.platform>=2.5.3` require `ansible-core>=2.17.0`. The `ee-minimal-rhel9` image has Python 3.9 where ansible-core 2.17+ cannot be pip-installed (no PyPI wheel). The `ee-supported-rhel9` image ships ansible-core via RPM on Python 3.12, satisfying the requirement.
+`requirements.yml` and `requirements.txt` contain ONLY what's not already in the base image. Core collections (`cisco.ios`, `arista.eos`, `ansible.netcommon`, `ansible.utils`, `ansible.controller`, etc.) ship with `ee-supported-rhel9` — do NOT override them or you'll get version conflicts.
 
-## ncclient Pin
+## Collection Version Mismatch Warnings (Fixed)
 
-`ncclient==0.6.13` is pinned because it's the last version validated with the Juniper/Cisco/Arista collection stack in this workshop. Don't unpin without testing network module compatibility.
+The base image's collections declare support for ansible-core >=2.17 but the image ships 2.15.x. Red Hat suppresses the resulting warnings in the stock image's ansible.cfg. Our custom ansible.cfg (used for galaxy server URLs during build) replaces the stock one in the galaxy stage, but that stage is discarded — so the stock suppression survives in the final image.
 
-## Collections
+If warnings reappear, set `ENV ANSIBLE_COLLECTIONS_ON_ANSIBLE_VERSION_MISMATCH=ignore` in `prepend_base` (persists to the final image). Do NOT rely on ansible.cfg changes in `prepend_galaxy` — that stage is thrown away.
 
-Core network collections: `cisco.ios`, `arista.eos`, `junipernetworks.junos`, `ansible.netcommon`, `ansible.utils`. Also includes `ansible.controller` and `ansible.platform` for AAP integration.
+## ansible.cfg
+
+The `ansible.cfg` in this directory configures Automation Hub galaxy servers. It is `ADD`ed in `prepend_galaxy` and used only during `ansible-galaxy collection install`. It does **not** exist in the final runtime image (see multi-stage build notes in ee-build-conventions rule).
