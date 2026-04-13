@@ -20,6 +20,7 @@ options:
 additional_build_steps:
     prepend_base:
         - RUN $PYCMD -m pip install --upgrade pip 'setuptools>=65,<81' wheel
+        - RUN $PYCMD -m pip install --index-url https://pypi.org/simple/ 'ansible-core>=2.17.0'
         - ENV PIP_NO_BUILD_ISOLATION=1
     prepend_galaxy:
         # Add custom ansible.cfg which defines collection install sources
