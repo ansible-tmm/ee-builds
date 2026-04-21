@@ -1,0 +1,29 @@
+---
+version: 3
+images:
+  base_image:
+    name: registry.redhat.io/ansible-automation-platform-26/ee-minimal-rhel9:latest
+dependencies:
+    galaxy: ansible-collections.yml
+    python: python-packages.txt
+    system: bindep.txt
+
+additional_build_files:
+    - src: ansible.cfg
+      dest: configs
+
+options:
+    package_manager_path: /usr/bin/microdnf
+
+additional_build_steps:
+    prepend_base:
+        - ENV PIP_IGNORE_INSTALLED=1
+        - RUN $PYCMD -m pip install --upgrade pip setuptools
+    prepend_builder:
+        - ENV PYCMD=/usr/bin/python3.12
+    prepend_final:
+        - ENV PYCMD=/usr/bin/python3.12
+    prepend_galaxy:
+        - ADD _build/configs/ansible.cfg /etc/ansible/ansible.cfg
+        - ARG AH_TOKEN
+        - ENV ANSIBLE_GALAXY_SERVER_AUTOMATION_HUB_TOKEN=$AH_TOKEN
