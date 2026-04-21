@@ -6,6 +6,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 This repository manages **Ansible Execution Environment (EE) container image definitions** built with `ansible-builder`. Each top-level directory (except `.github/`, `.devcontainer/`, `.vscode/`, `.ansible/`) is a self-contained EE definition. Images are built via GitHub Actions and pushed to **quay.io** (production, on push to `main`). PR builds compile the image but do not push it.
 
+The upstream fork is `ansible-tmm/ee-builds`. This fork (`leogallego/ansible-ee-builds`) adds custom EEs.
+
 ## Build Commands
 
 ```bash
