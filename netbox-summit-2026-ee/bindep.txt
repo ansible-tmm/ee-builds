@@ -1,0 +1,5 @@
+python3-systemd
+systemd-devel [platform:rpm]
+krb5-devel [platform:rpm]
+python3.12-devel [platform:rpm]
+pkgconf-pkg-config
