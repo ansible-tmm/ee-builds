@@ -1,4 +1,5 @@
 # Extra Python packages not already satisfied by ee-supported-rhel9 base image.
+# ovirt-engine-sdk-python is source-only — requires setuptools to compile.
 # Most network collection deps (ncclient, paramiko, textfsm, ttp, jxmlease,
 # xmltodict, netaddr, scp, etc.) are pre-installed via the base image's
 # bundled collections. Only add packages the DELTA collections need or
