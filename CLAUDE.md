@@ -6,8 +6,6 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 This repository manages **Ansible Execution Environment (EE) container image definitions** built with `ansible-builder`. Each top-level directory (except `.github/`, `.devcontainer/`, `.vscode/`, `.ansible/`) is a self-contained EE definition. Images are built via GitHub Actions and pushed to **quay.io** (production, on push to `main`). PR builds compile the image but do not push it.
 
-The upstream fork is `ansible-tmm/ee-builds`. This fork (`leogallego/ansible-ee-builds`) adds custom EEs.
-
 ## Build Commands
 
 ```bash
@@ -81,15 +79,52 @@ The `prepend_galaxy` block injects `ansible.cfg` and the AH token so `ansible-ga
 
 ## Base Image Selection
 
-Images live in `registry.redhat.io/ansible-automation-platform-<aap-version>/`:
+Images live in `registry.redhat.io/ansible-automation-platform-<aap-version>/`. AAP versions: `24`, `25`, `26` (current). RHEL versions: `rhel8`, `rhel9`, `rhel10` (aap26 only, not yet available). Prefer `:latest` tag over SHA pins unless reproducibility is critical.
 
-| Image | Python | ansible-core | Use when |
-|-------|--------|-------------|----------|
-| `ee-minimal-rhel8/9` | 3.9 | Not included | Collections don't require ansible-core >=2.17 |
-| `ee-supported-rhel8/9` | 3.12 | 2.15.x (RPM) | Collections need newer ansible-core or you want pre-bundled collections |
-| `de-minimal-rhel8` | — | — | Development Environments (not EEs) |
+### ee-minimal (Execution Environments — minimal base)
 
-AAP versions: `aap-23` (oldest), `aap-24` (current), `aap-25` (newest). Prefer `:latest` tag over SHA pins unless reproducibility is critical.
+| AAP | RHEL | ansible-core | Python | Jinja |
+|-----|------|-------------|--------|-------|
+| 24 | rhel8 | 2.16.17 | 3.12.12 | 3.1.6 |
+| 24 | rhel9 | 2.16.17 | 3.12.12 | 3.1.6 |
+| 25 | rhel8 | 2.16.17 | 3.12.12 | 3.1.6 |
+| 25 | rhel9 | 2.16.17 | 3.12.12 | 3.1.6 |
+| 26 | rhel9 | 2.16.18 | 3.12.12 | 3.1.6 |
+
+### ee-supported (Execution Environments — with pre-bundled collections)
+
+| AAP | RHEL | ansible-core | Python | Jinja |
+|-----|------|-------------|--------|-------|
+| 24 | rhel8 | 2.15.12 | 3.9.19 | 3.1.4 |
+| 24 | rhel9 | 2.16.17 | 3.12.12 | 3.1.6 |
+| 25 | rhel8 | 2.16.14 | 3.11.11 | 3.1.6 |
+| 25 | rhel9 | 2.16.17 | 3.12.12 | 3.1.6 |
+| 26 | rhel9 | 2.16.18 | 3.12.12 | 3.1.6 |
+
+### de-minimal (Development Environments — minimal base)
+
+| AAP | RHEL | ansible-core | Python | Jinja |
+|-----|------|-------------|--------|-------|
+| 24 | rhel8 | 2.16.17 | 3.12.12 | 3.1.6 |
+| 24 | rhel9 | 2.16.17 | 3.12.12 | 3.1.6 |
+| 25 | rhel8 | 2.16.17 | 3.12.12 | 3.1.6 |
+| 25 | rhel9 | 2.16.15 | 3.11.13 | 3.1.6 |
+| 26 | rhel9 | 2.16.18 | 3.12.12 | 3.1.6 |
+
+### de-supported (Development Environments — with pre-bundled collections)
+
+| AAP | RHEL | ansible-core | Python | Jinja |
+|-----|------|-------------|--------|-------|
+| 24 | rhel8 | 2.16.17 | 3.12.12 | 3.1.6 |
+| 24 | rhel9 | 2.16.17 | 3.12.12 | 3.1.6 |
+| 25 | rhel8 | 2.16.11 | 3.11.9 | 3.1.4 |
+| 25 | rhel9 | 2.16.14 | 3.11.9 | 3.1.4 |
+| 26 | rhel9 | 2.16.18 | 3.12.12 | 3.1.6 |
+
+**Notes:**
+- aap26 rhel8 images are not available for any image type.
+- aap26 rhel10 images are not yet available (expected future release).
+- ee-supported/de-supported ship pre-bundled collections — only add delta dependencies (see below).
 
 ### Delta-only dependencies for ee-supported
 
@@ -104,7 +139,13 @@ collections:
 
 ## pip Build Isolation
 
-`ansible-builder >=3.1` ships pip 26+ which enforces PEP 517 build isolation. Source-only packages (`ncclient`, `ovirt-engine-sdk-python`, `systemd-python`) fail with `No module named 'setuptools'`. This repo pins `ansible-builder==3.0.0` to avoid the issue. Don't upgrade without addressing build isolation.
+Neither `ansible-builder` 3.0.0 nor 3.1.1 upgrades pip in the generated Containerfile — both just call `ensurepip`, keeping the base image's pip (23.2.1). The build isolation problem only occurs when an EE's own `prepend_base` runs `pip install --upgrade pip`, which upgrades to pip 24+ where PEP 517 build isolation is enforced by default. Source-only packages that need `setuptools` to compile then fail because the isolated build environment doesn't include it.
+
+**Affected packages:** `ovirt-engine-sdk-python` and `systemd-python` remain source-only. `ncclient` now ships a universal wheel and is no longer affected.
+
+**Prevention:** avoid `pip install --upgrade pip` in `prepend_base`. If an upgrade is needed, pin below 24: `pip install 'pip<24'`. Alternatively, add `ENV PIP_NO_BUILD_ISOLATION=1` in `prepend_base` to disable build isolation (pip will use system `setuptools` instead of creating an isolated env).
+
+**Builder version note:** `ansible-builder` 3.1+ adds the `dependencies.exclude` directive (useful when an EE's collections pull in packages already in the base image). The builder was previously pinned to 3.0.0 due to a misdiagnosed build isolation failure — the actual cause was `pip install --upgrade pip` in `network-ee`'s `prepend_base`, not the builder version.
 
 ## CI/CD Architecture
 
