@@ -16,7 +16,7 @@ collections:
   - name: ansible.netcommon               
   - name: ansible.network                 
   - name: ansible.posix                   
-#  - name: ansible.scm                     
+  - name: ansible.scm
 #  - name: ansible.security                
 #  - name: ansible.snmp                    
   - name: ansible.utils                   
