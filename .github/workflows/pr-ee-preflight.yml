@@ -1,0 +1,196 @@
+name: EE Preflight Check
+
+on:
+  pull_request_target:
+    branches:
+      - main
+    types: [opened, reopened, synchronize]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+
+jobs:
+  prepare-matrix:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+      length: ${{ steps.set-matrix.outputs.length }}
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ github.event.pull_request.head.repo.full_name }}
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - name: Generate matrix
+        id: generate-matrix
+        run: |
+          python -u .github/workflows/generate_matrix.py \
+            --start-ref origin/$GITHUB_BASE_REF \
+            --end-ref $GITHUB_HEAD_REF \
+            --output-path matrix_output.json
+
+      - name: Read matrix
+        id: set-matrix
+        run: |
+          MATRIX_JSON=$(cat matrix_output.json)
+          echo "matrix=$MATRIX_JSON" >> "$GITHUB_OUTPUT"
+          MATRIX_LENGTH=$(echo "$MATRIX_JSON" | jq '.include | length')
+          echo "length=$MATRIX_LENGTH" >> "$GITHUB_OUTPUT"
+
+  preflight:
+    needs: [prepare-matrix]
+    if: ${{ needs.prepare-matrix.outputs.length != '0' }}
+    runs-on: ubuntu-latest
+    environment: test
+    strategy:
+      matrix: ${{ fromJson(needs.prepare-matrix.outputs.matrix) }}
+      fail-fast: false
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ github.event.pull_request.head.repo.full_name }}
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.ref != '' && github.event.pull_request.head.ref || 'main' }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Install ee-preflight
+        run: pip install git+https://github.com/leogallego/ee-preflight.git@main
+
+      - name: Substitute token for automation hub
+        run: |
+          sed -i "s/my_ah_token/${{ secrets.AH_TOKEN }}/g" ansible.cfg
+
+      - name: Run ee-preflight
+        id: preflight
+        working-directory: ${{ matrix.ee }}
+        env:
+          AH_TOKEN: ${{ secrets.AH_TOKEN }}
+        run: |
+          set +e
+          ee-preflight execution-environment.yml --json > preflight-result.json 2>&1
+          EXIT_CODE=$?
+          set -e
+
+          echo "exit_code=$EXIT_CODE" >> "$GITHUB_OUTPUT"
+
+          # Human-readable output for the log
+          echo "## ee-preflight: ${{ matrix.ee }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          if [ "$EXIT_CODE" -eq 0 ]; then
+            echo "Result: PASS" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "Result: FAIL" >> "$GITHUB_STEP_SUMMARY"
+          fi
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo '```json' >> "$GITHUB_STEP_SUMMARY"
+          cat preflight-result.json >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+
+          # Also print to log for quick visibility
+          cat preflight-result.json | python -m json.tool 2>/dev/null || cat preflight-result.json
+
+          exit $EXIT_CODE
+
+      - name: Upload preflight artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: preflight-${{ matrix.ee }}
+          path: ${{ matrix.ee }}/preflight-result.json
+
+  post-preflight-comment:
+    needs: [prepare-matrix, preflight]
+    if: always() && needs.prepare-matrix.outputs.length != '0'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: preflight-*
+
+      - name: Build and post comment
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const path = require('path');
+            const MARKER = '<!-- ee-preflight-results -->';
+
+            let body = MARKER + '\n';
+            body += '### ee-preflight results\n\n';
+
+            const sha = context.payload.pull_request?.head?.sha || context.sha;
+            body += `Commit: \`${sha.substring(0, 7)}\`\n\n`;
+
+            const dirs = fs.readdirSync('.', { withFileTypes: true })
+              .filter(d => d.isDirectory() && d.name.startsWith('preflight-'))
+              .sort((a, b) => a.name.localeCompare(b.name));
+
+            for (const dir of dirs) {
+              const files = fs.readdirSync(dir.name);
+              for (const file of files) {
+                const filePath = path.join(dir.name, file);
+                const eeName = dir.name.replace('preflight-', '');
+
+                let content;
+                try {
+                  content = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+                } catch (e) {
+                  body += `**${eeName}**: failed to parse results\n\n`;
+                  continue;
+                }
+
+                const passed = content.result === 'pass';
+                const icon = passed ? '✅' : '❌';
+                body += `${icon} **${eeName}**\n\n`;
+
+                for (const layer of (content.layers || [])) {
+                  const findings = (layer.findings || []).filter(f => f.severity !== 'info');
+                  if (findings.length === 0) continue;
+
+                  body += `<details>\n<summary>${layer.name} (${findings.length} finding(s))</summary>\n\n`;
+                  for (const f of findings) {
+                    const sev = f.severity === 'error' ? '❌' : '⚠️';
+                    body += `- ${sev} ${f.message}\n`;
+                    if (f.fix) body += `  - Fix: \`${f.fix}\`\n`;
+                  }
+                  body += `\n</details>\n\n`;
+                }
+              }
+            }
+
+            if (dirs.length === 0) {
+              body += '_No preflight results found._\n';
+            }
+
+            // Find existing preflight comment by hidden marker
+            const prNumber = context.issue.number;
+            const { data: comments } = await github.rest.issues.listComments({
+              ...context.repo,
+              issue_number: prNumber,
+            });
+            const existing = comments.find(c => c.body && c.body.includes(MARKER));
+
+            if (existing) {
+              await github.rest.issues.updateComment({
+                ...context.repo,
+                comment_id: existing.id,
+                body: body.trim(),
+              });
+            } else {
+              await github.rest.issues.createComment({
+                ...context.repo,
+                issue_number: prNumber,
+                body: body.trim(),
+              });
+            }
