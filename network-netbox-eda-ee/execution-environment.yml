@@ -1,4 +1,5 @@
 ---
+# Test ee-preflight CI workflow
 version: 3
 images:
   base_image:
