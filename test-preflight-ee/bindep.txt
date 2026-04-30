@@ -1,0 +1,1 @@
+pkgconf-pkg-config [platform:rpm]

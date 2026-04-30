@@ -1,0 +1,10 @@
+---
+collections:
+  - name: netbox.netbox
+    version: 3.22.0
+  - name: community.general
+  - name: ansible.netcommon
+  - name: ansible.utils
+  - name: ansible.posix
+  - name: arista.eos
+  - name: cisco.ios
