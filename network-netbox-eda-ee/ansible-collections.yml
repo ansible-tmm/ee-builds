@@ -23,6 +23,7 @@ collections:
   - name: ansible.yang                    
 
 ## network vendors
+  - name: fake.nonexistent_collection
   - name: arista.eos                      
   - name: cisco.ios
   - name: junipernetworks.junos
