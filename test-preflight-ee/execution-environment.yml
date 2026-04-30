@@ -1,0 +1,35 @@
+---
+version: 3
+
+# BUG 1: Stray root-level collections key — silently ignored in EE v3.
+# ansible-builder won't install these. Build succeeds, EE is broken at runtime.
+collections:
+  - name: ansible.posix
+  - name: community.general
+
+images:
+  base_image:
+    name: registry.redhat.io/ansible-automation-platform-25/ee-minimal-rhel8:latest
+
+dependencies:
+    # BUG 2: Typo in filename — python-reqs.txt doesn't exist.
+    # ansible-builder fails with a generic file-not-found deep in the build.
+    galaxy: requirements.yml
+    python: python-reqs.txt
+    system: bindep.txt
+
+additional_build_files:
+    - src: ansible.cfg
+      dest: configs
+
+options:
+    package_manager_path: /usr/bin/microdnf
+
+additional_build_steps:
+    prepend_base:
+        - ENV PIP_IGNORE_INSTALLED=1
+        - RUN $PYCMD -m pip install --upgrade pip setuptools
+    prepend_galaxy:
+        - ADD _build/configs/ansible.cfg /etc/ansible/ansible.cfg
+        - ARG AH_TOKEN
+        - ENV ANSIBLE_GALAXY_SERVER_AUTOMATION_HUB_TOKEN=$AH_TOKEN
