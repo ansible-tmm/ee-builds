@@ -12,35 +12,21 @@ collections:
 
   ## certified collections
   - name: ansible.controller
-    version: 4.7.10
   - name: ansible.eda
-    version: 2.11.0
   - name: ansible.hub
-    version: 1.0.6
   - name: ansible.platform
-    version: 2.6.20260306
   - name: ansible.netcommon
-    version: 8.5.0
   - name: ansible.network
-    version: 5.0.0
   - name: ansible.posix
-    version: 2.1.0
   - name: ansible.scm
-    version: 3.2.1
-  - name: ansible.security
-    version: 5.0.0
+#  - name: ansible.security
   - name: ansible.snmp
-    version: 3.1.0
   - name: ansible.utils
-    version: 6.0.2
   - name: ansible.yang
-    version: 3.1.0
 
   ## network vendor collections
   - name: arista.eos
     version: 12.0.1
-  - name: cisco.dnac
-    version: 6.49.0
   - name: cisco.ios
     version: 11.3.0
   - name: junipernetworks.junos
