@@ -32,6 +32,9 @@ collections:
   - name: junipernetworks.junos
     version: 11.1.1
 
+  ## cloud collections
+  - name: amazon.aws
+
   ## platform collections
   - name: containers.podman
     version: 1.19.2
