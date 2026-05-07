@@ -3,6 +3,8 @@ collections:
   ## netbox
   - name: netbox.netbox
     version: 3.22.0
+  - name: leogallego.netbox
+    version: ">=1.1.0"
 
   ## community collections
   - name: community.general
