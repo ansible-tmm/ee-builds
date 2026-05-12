@@ -1,0 +1,19 @@
+---
+version: 3
+images:
+  base_image:
+    name: quay.io/acme_corp/netbox-summit-2026-ee:v3.22-3
+
+options:
+  package_manager_path: /usr/bin/microdnf
+
+additional_build_files:
+  - src: crypto-policies/libssh-legacy.config
+    dest: configs
+  - src: crypto-policies/opensslcnf-legacy.config
+    dest: configs
+
+additional_build_steps:
+  prepend_final:
+    - ADD _build/configs/libssh-legacy.config /etc/crypto-policies/back-ends/libssh.config
+    - ADD _build/configs/opensslcnf-legacy.config /etc/crypto-policies/back-ends/opensslcnf.config
