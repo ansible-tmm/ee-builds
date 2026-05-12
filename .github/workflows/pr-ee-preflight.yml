@@ -63,6 +63,13 @@ jobs:
         with:
           python-version: "3.13"
 
+      - name: Log in to registry.redhat.io
+        uses: redhat-actions/podman-login@v1
+        with:
+          registry: registry.redhat.io
+          username: ${{ secrets.REDHAT_SA_USERNAME }}
+          password: ${{ secrets.REDHAT_SA_PASSWORD }}
+
       - name: Install ee-preflight
         run: pip install git+https://github.com/leogallego/ee-preflight.git@main
 
