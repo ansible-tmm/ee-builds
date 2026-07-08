@@ -1,4 +1,4 @@
-name: Refresh Red Hat Token
+name: Refresh Red Hat Token (Leo)
 
 on:
   schedule:
@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Refresh Red Hat Token
+      - name: Refresh Red Hat Token (Leo)
         env:
           REFRESH_TOKEN: ${{ secrets.AH_TOKEN }} # Add your refresh token as a secret
         run: |
