@@ -1,6 +1,23 @@
+# AWS
+boto3>=1.28.0
+botocore>=1.31.0
+
+# Azure
+azure-cli-core
+azure-identity
+azure-mgmt-compute
+azure-mgmt-network
+azure-mgmt-resource
+azure-mgmt-storage
+
+# Google Cloud
+google-auth>=1.0.1
+
+# Terraform
+python-hcl2
+
 # ServiceNow
 pysnow
-requests
 
 # Kubernetes
 kubernetes>=24.2.0
@@ -15,6 +32,14 @@ xmltodict
 netaddr
 jmespath
 
+# Source-only C extensions (exercises pip isolation + compile deps)
+systemd-python
+
+# VMware
+pyvmomi
+
 # General
 pyyaml
-jinja2
+requests
+cryptography>=36.0.0
+psycopg[binary,pool]

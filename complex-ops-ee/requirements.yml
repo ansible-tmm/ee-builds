@@ -10,6 +10,14 @@ collections:
   # Event-Driven Ansible
   - name: ansible.eda
 
+  # Cloud providers
+  - name: amazon.aws
+  - name: community.aws
+  - name: azure.azcollection
+  - name: google.cloud
+  - name: cloud.terraform
+  - name: community.vmware
+
   # Network vendors
   - name: cisco.ios
   - name: cisco.nxos
@@ -25,7 +33,12 @@ collections:
   # RHEL system roles
   - name: redhat.rhel_system_roles
 
+  # Controller and platform
+  - name: ansible.controller
+  - name: ansible.platform
+
   # General utilities
   - name: ansible.posix
   - name: ansible.utils
   - name: community.general
+  - name: community.crypto

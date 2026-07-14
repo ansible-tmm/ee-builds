@@ -8,6 +8,9 @@ dependencies:
   galaxy: requirements.yml
   python: requirements.txt
   system: bindep.txt
+  exclude:
+    system:
+      - openshift-clients
 
 additional_build_files:
     - src: ansible.cfg
@@ -17,10 +20,16 @@ options:
     package_manager_path: /usr/bin/microdnf
 
 additional_build_steps:
+    prepend_base:
+        - ENV ANSIBLE_COLLECTIONS_ON_ANSIBLE_VERSION_MISMATCH=ignore
+        - ENV ANSIBLE_LIBSSH_PUBLICKEY_ALGORITHMS=ssh-rsa
     prepend_builder:
         - ENV PYCMD=/usr/bin/python3.12
     prepend_final:
         - ENV PYCMD=/usr/bin/python3.12
+        - RUN microdnf install -y crypto-policies-scripts && update-crypto-policies --set DEFAULT:SHA1 && microdnf clean all
+    append_final:
+        - ADD _build/configs/ansible.cfg /etc/ansible/ansible.cfg
     prepend_galaxy:
         - ADD _build/configs/ansible.cfg /etc/ansible/ansible.cfg
         - ARG AH_TOKEN
