@@ -5,7 +5,7 @@ execution-environment/context
 .lock
 **/venv
 **/.venv
-ansible.cfg
+# ansible.cfg
 **/.ansible/
 .DS_Store
 .lock
