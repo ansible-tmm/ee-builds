@@ -1,5 +1,5 @@
-# aws_ee
-definition file for aws_ee
+# aws_gameday_ee
+Definition file for aws_gameday_ee
 
 ## Requirements:
 
