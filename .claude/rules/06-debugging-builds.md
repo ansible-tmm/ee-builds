@@ -19,7 +19,7 @@ alwaysApply: false
 | `No package matches 'python39-devel'` | Wrong python-devel package name for the RHEL version | Use `python3.12-devel` for RHEL 9, `python3.11-devel` for RHEL 8 AAP 2.5 | 01-B |
 | Galaxy stage fails with 401/403 | AH_TOKEN missing or expired | Check `--build-arg AH_TOKEN=...`, verify token is fresh, check ansible.cfg server config | CI |
 | Galaxy stage fails with 504 | Automation Hub transient error | Rerun the workflow | CI |
-| Galaxy warnings: `Skipping Galaxy server ... HTTP Error 400` | Validated content server auth issue | Non-fatal if collections install from fallback servers. To fix, add token to validated server config in ansible.cfg | CI |
+| Galaxy warnings: `Skipping Galaxy server ... HTTP Error 400` | Validated content server token not set in prepend_galaxy | Add `ENV ANSIBLE_GALAXY_SERVER_AUTOMATION_HUB_VALIDATED_TOKEN=$AH_TOKEN` alongside the published token. Non-fatal if collections install from fallback servers, but slows the build and may miss validated-only content | 07 |
 | Collection version warnings at runtime | ee-supported base collections declare higher ansible-core than shipped | `ENV ANSIBLE_COLLECTIONS_ON_ANSIBLE_VERSION_MISMATCH=ignore` in prepend_base | 05 |
 | SSH to device fails with `kex_exchange_identification` | RHEL 9 crypto policies reject legacy algorithms | Use `update-crypto-policies --set DEFAULT:SHA1` or surgical config replacement in append_final | 05 |
 | `ansible.cfg` changes missing at runtime | ansible.cfg added only in galaxy stage (discarded after collection install) | Also ADD ansible.cfg in `append_final` if runtime config is needed | 03 |

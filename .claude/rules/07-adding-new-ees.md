@@ -42,7 +42,7 @@ alwaysApply: false
 
 7. **If using ee-supported base**: only add delta collections and packages not already in the base image (see rule 04)
 
-8. **Add ansible.cfg** to `additional_build_files` and inject in `prepend_galaxy`
+8. **Add ansible.cfg** to `additional_build_files` and inject in `prepend_galaxy`. Set the token for BOTH published and validated servers, otherwise collections from the validated content repo will fail with HTTP 400.
    ```yaml
    additional_build_files:
        - src: ansible.cfg
@@ -52,6 +52,7 @@ alwaysApply: false
            - ADD _build/configs/ansible.cfg /etc/ansible/ansible.cfg
            - ARG AH_TOKEN
            - ENV ANSIBLE_GALAXY_SERVER_AUTOMATION_HUB_TOKEN=$AH_TOKEN
+           - ENV ANSIBLE_GALAXY_SERVER_AUTOMATION_HUB_VALIDATED_TOKEN=$AH_TOKEN
    ```
 
 9. **If ansible.cfg needed at runtime**: also ADD in `append_final` (see rule 03). The galaxy stage copy is discarded.
