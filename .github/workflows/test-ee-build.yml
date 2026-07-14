@@ -1,10 +1,6 @@
 name: Test EE Builds
 
 on:
-  pull_request:
-    branches:
-      - main
-    types: [opened, reopened, synchronize]
   workflow_dispatch:
 
 permissions:
