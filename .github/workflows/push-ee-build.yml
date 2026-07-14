@@ -13,11 +13,11 @@ jobs:
       length: ${{ steps.set-matrix.outputs.length }}
     steps:
     - name: Checkout repo
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4
       with:
         fetch-depth: 0
 
-    - name: Generate matrix  
+    - name: Generate matrix
       id: generate-matrix
       working-directory: ${{ github.workspace }}
       run: |
@@ -31,10 +31,9 @@ jobs:
       working-directory: ${{ github.workspace }}
       run: |
         MATRIX_JSON=$(cat matrix_output.json)
-        echo "::set-output name=matrix::$MATRIX_JSON"
-        MATRIX_LENGTH=$(echo $MATRIX_JSON | jq '.include | length')
-        echo $MATRIX_LENGTH
-        echo "::set-output name=length::$MATRIX_LENGTH"
+        echo "matrix=$MATRIX_JSON" >> "$GITHUB_OUTPUT"
+        MATRIX_LENGTH=$(echo "$MATRIX_JSON" | jq '.include | length')
+        echo "length=$MATRIX_LENGTH" >> "$GITHUB_OUTPUT"
 
   build-ee:
     needs: [prepare-matrix]
@@ -46,15 +45,9 @@ jobs:
       fail-fast: false
     steps:
       - name: Checkout repo
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          ref: ${{ github.head_ref }}
-
-      - name: Fetch the base and head refs
-        run: |
-          git fetch origin ${{ github.base_ref }}
-          git fetch origin ${{ github.head_ref }}
 
       - name: Install python requirements (ansible-builder)
         run: pip install -r requirements.txt
@@ -81,10 +74,6 @@ jobs:
       - name: Substitute token for automation hub
         run: |
           sed -i "s/my_ah_token/${{ secrets.AH_TOKEN }}/g" ansible.cfg
-
-      - name: (devel) Build image and create artifact
-        run: |
-          echo "Would build: ${{ env.EE }}"
 
       - name: Build image and create artifact
         working-directory: ${{ matrix.ee }}
