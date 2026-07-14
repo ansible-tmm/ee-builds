@@ -60,8 +60,12 @@ def main():
     changed_files = get_changed_files(args.start_ref, end_ref, logger)
     dirs = set()
 
+    excluded_prefixes = ('tests/', '.github/', '.claude/')
     for file in changed_files:
         dir_name = os.path.dirname(file)
+        if any(dir_name.startswith(prefix) for prefix in excluded_prefixes):
+            logger.info(f"Skipping excluded directory: {dir_name}")
+            continue
         ee_file_path = os.path.join(os.getenv('GITHUB_WORKSPACE', ''), dir_name, "execution-environment.yml")
         if dir_name not in dirs and os.path.isfile(ee_file_path):
             logger.info(f"EE file found: {ee_file_path}")
