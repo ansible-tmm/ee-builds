@@ -23,7 +23,9 @@ additional_build_steps:
 #        - RUN /usr/bin/python3 -m ensurepip && /usr/bin/python3 -m pip install --upgrade pip setuptools
          - RUN microdnf install -y python3-pip && /usr/bin/python3 -m pip install --upgrade pip setuptools
     prepend_builder:
-        - RUN /usr/bin/microdnf install -y python3-pip python3.12-devel gcc && /usr/bin/python3 -m pip install --upgrade pip setuptools
+        - ENV PYCMD=/usr/bin/python3.12
+    prepend_final:
+        - ENV PYCMD=/usr/bin/python3.12
     prepend_galaxy:
         # Add custom ansible.cfg which defines collection install sources
         - ADD _build/configs/ansible.cfg /etc/ansible/ansible.cfg
