@@ -12,3 +12,7 @@ ansible.cfg
 .venv
 **/.vscode
 tmp/
+.devcontainer/
+**/.devcontainer/
+.cursor/
+**/.cursor/
