@@ -101,7 +101,7 @@ Images live in `registry.redhat.io/ansible-automation-platform-<aap-version>/`. 
 | 25 | rhel9 | 2.16.17 | 3.12.12 | 3.1.6 |
 | 26 | rhel9 | 2.16.18 | 3.12.12 | 3.1.6 |
 
-### de-minimal (Development Environments — minimal base)
+### de-minimal (Decision Environments for EDA — minimal base)
 
 | AAP | RHEL | ansible-core | Python | Jinja |
 |-----|------|-------------|--------|-------|
@@ -111,7 +111,7 @@ Images live in `registry.redhat.io/ansible-automation-platform-<aap-version>/`. 
 | 25 | rhel9 | 2.16.15 | 3.11.13 | 3.1.6 |
 | 26 | rhel9 | 2.16.18 | 3.12.12 | 3.1.6 |
 
-### de-supported (Development Environments — with pre-bundled collections)
+### de-supported (Decision Environments for EDA — with pre-bundled collections)
 
 | AAP | RHEL | ansible-core | Python | Jinja |
 |-----|------|-------------|--------|-------|
@@ -136,6 +136,31 @@ collections:
   - name: cisco.asa          # not in ee-supported
   # Do NOT add cisco.ios, ansible.netcommon — they ship with the base
 ```
+
+## PYCMD Hijack on RHEL 9
+
+On RHEL 9 ee-minimal images, `microdnf` pulls in `python3-3.9` as a transitive dependency when installing system packages. This takes over `/usr/bin/python3` from Python 3.12, breaking pip, wheel compilation, and the final image.
+
+Fix: pin `PYCMD` in both builder and final stages. For AAP 2.7, also reinstall builder script dependencies for Python 3.12.
+
+```yaml
+# AAP 2.6 ee-minimal-rhel9
+prepend_builder:
+    - ENV PYCMD=/usr/bin/python3.12
+prepend_final:
+    - ENV PYCMD=/usr/bin/python3.12
+
+# AAP 2.7 ee-minimal-rhel9 (also needs builder deps reinstall)
+prepend_builder:
+    - ENV PYCMD=/usr/bin/python3.12
+    - RUN $PYCMD -m pip install --upgrade pip setuptools requirements-parser bindep pyyaml distro packaging Parsley
+prepend_final:
+    - ENV PYCMD=/usr/bin/python3.12
+```
+
+The `python3.XX-devel` package in bindep.txt must match the active Python (e.g., `python3.12-devel` for AAP 2.6/2.7 on RHEL 9).
+
+See `.claude/rules/01-python-version-pitfalls.md` for full details.
 
 ## pip Build Isolation
 
@@ -170,16 +195,40 @@ Only EE directories with changed files between the base and head refs are built.
 1. Create a new directory at the repo root (name = image name, use lowercase with hyphens or underscores).
 2. Add `execution-environment.yml` (version 3) pointing to the desired base image.
 3. Add dependency files as needed (`requirements.yml`, `requirements.txt`/`python-packages.txt`, `bindep.txt`).
-4. Copy `ansible.cfg` from an existing EE (contains Galaxy server config with `my_ah_token` placeholder).
-5. Add `ansible.cfg` to `additional_build_files` in the EE definition.
-6. No workflow changes needed.
+4. If RHEL 9 ee-minimal: add `ENV PYCMD=/usr/bin/python3.12` in `prepend_builder` and `prepend_final`. If AAP 2.7, also reinstall builder script deps.
+5. Ensure `python3.XX-devel` in `bindep.txt` matches the active Python (e.g., `python3.12-devel` for AAP 2.6/2.7 rhel9).
+6. Copy `ansible.cfg` from an existing EE (contains Galaxy server config with `my_ah_token` placeholder).
+7. Add `ansible.cfg` to `additional_build_files` in the EE definition.
+8. No workflow changes needed.
 
 ## Debugging EE Builds
 
 | Symptom | Cause | Fix |
 |---------|-------|-----|
+| `fatal error: Python.h: No such file or directory` | Missing or wrong python-devel | Add `python3.12-devel` (must match active Python) to bindep.txt |
+| `ModuleNotFoundError: No module named 'requirements'` | PYCMD overridden but builder scripts not reinstalled (AAP 2.7) | Add `RUN $PYCMD -m pip install ... requirements-parser bindep pyyaml distro packaging Parsley` in prepend_builder |
+| `No module named 'ansible'` in check_ansible | Final image python3 points to 3.9 but ansible installed under 3.12 | Set `ENV PYCMD=/usr/bin/python3.12` in prepend_final |
+| `No module named setuptools` | pip 24+ build isolation with source-only package | Pin `pip<24`, set `ENV PIP_NO_BUILD_ISOLATION=1`, or don't upgrade pip |
+| Wheels downloaded as `cp39` instead of `cp312` | PYCMD hijacked to Python 3.9 | Set `ENV PYCMD=/usr/bin/python3.12` in prepend_builder and prepend_final |
+| `No package matches 'openshift-clients'` | `kubernetes.core` bindep requires OCP repo | Use `dependencies.exclude.system` or enable repo via PKGMGR_OPTS |
 | Build failure in galaxy stage | Automation Hub auth | Check AH_TOKEN, network connectivity |
-| `No module named setuptools` | pip build isolation (ansible-builder >=3.1) | Stay on `ansible-builder==3.0.0` or set `ENV PIP_NO_BUILD_ISOLATION=1` in `prepend_base` |
-| `No module named pip` | microdnf removed pip | Add `python3-pip` to `bindep.txt` + `RUN $PYCMD -m ensurepip` in `prepend_base` |
-| Collection version warnings at runtime | Build overwrites base image's ansible.cfg | Use `ENV ANSIBLE_COLLECTIONS_ON_ANSIBLE_VERSION_MISMATCH=ignore` in `prepend_base` (not ansible.cfg in galaxy stage) |
+| Collection version warnings at runtime | ee-supported collections declare higher ansible-core | `ENV ANSIBLE_COLLECTIONS_ON_ANSIBLE_VERSION_MISMATCH=ignore` in prepend_base |
 | Collections pulling wrong versions | Overriding base image collections | Trim `requirements.yml` to delta-only |
+
+See `.claude/rules/06-debugging-builds.md` for the full reference table.
+
+## Test EEs
+
+The `tests/` directory contains regression test EEs that exercise the pitfalls documented in `.claude/rules/`. All four test EEs build on every PR via `.github/workflows/test-ee-build.yml`. See `tests/README.md` for details.
+
+## Detailed Rules
+
+| Rule File | Topic |
+|-----------|-------|
+| `.claude/rules/01-python-version-pitfalls.md` | PYCMD hijack, python-devel matching, builder deps |
+| `.claude/rules/02-pip-build-isolation.md` | pip upgrade trap, source-only packages |
+| `.claude/rules/03-multi-stage-build-mechanics.md` | Stage persistence, ENV/file placement |
+| `.claude/rules/04-base-image-selection.md` | AAP/RHEL matrix, ee-minimal vs ee-supported |
+| `.claude/rules/05-common-workarounds.md` | Legacy crypto, PIP_IGNORE_INSTALLED, openshift-clients |
+| `.claude/rules/06-debugging-builds.md` | Symptom/cause/fix reference table |
+| `.claude/rules/07-adding-new-ees.md` | New EE checklist with all pitfalls |

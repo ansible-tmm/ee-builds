@@ -1,0 +1,3 @@
+# pyyaml has an optional C extension, netaddr is pure Python
+pyyaml
+netaddr

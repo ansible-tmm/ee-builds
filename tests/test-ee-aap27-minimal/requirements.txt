@@ -1,0 +1,5 @@
+# systemd-python is source-only (C extension) — exercises:
+# 1. python3.12-devel must be in bindep.txt
+# 2. systemd-devel must be in bindep.txt
+# 3. Build must NOT upgrade pip (source-only + pip 24+ = failure)
+systemd-python

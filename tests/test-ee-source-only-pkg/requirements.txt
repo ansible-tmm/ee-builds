@@ -1,0 +1,3 @@
+# Source-only package (no pre-built wheel on PyPI)
+# Fails if pip >= 24 with build isolation enabled
+systemd-python

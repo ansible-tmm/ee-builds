@@ -1,0 +1,31 @@
+---
+# TEST: AAP 2.7 ee-minimal-rhel9 (hardest case)
+# Validates: PYCMD hijack fix, builder deps reinstall, python3.12-devel, C extension build
+# Rules tested: 01-A, 01-B, 01-C
+version: 3
+images:
+  base_image:
+    name: registry.redhat.io/ansible-automation-platform-27/ee-minimal-rhel9:latest
+
+dependencies:
+  galaxy: requirements.yml
+  python: requirements.txt
+  system: bindep.txt
+
+additional_build_files:
+    - src: ansible.cfg
+      dest: configs
+
+options:
+    package_manager_path: /usr/bin/microdnf
+
+additional_build_steps:
+    prepend_builder:
+        - ENV PYCMD=/usr/bin/python3.12
+        - RUN $PYCMD -m pip install --upgrade pip setuptools requirements-parser bindep pyyaml distro packaging Parsley
+    prepend_final:
+        - ENV PYCMD=/usr/bin/python3.12
+    prepend_galaxy:
+        - ADD _build/configs/ansible.cfg /etc/ansible/ansible.cfg
+        - ARG AH_TOKEN
+        - ENV ANSIBLE_GALAXY_SERVER_AUTOMATION_HUB_TOKEN=$AH_TOKEN
