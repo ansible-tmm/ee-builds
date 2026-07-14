@@ -1,0 +1,31 @@
+---
+collections:
+  # ServiceNow ITSM
+  - name: servicenow.itsm
+
+  # Kubernetes and OpenShift
+  - name: kubernetes.core
+  - name: redhat.openshift
+
+  # Event-Driven Ansible
+  - name: ansible.eda
+
+  # Network vendors
+  - name: cisco.ios
+  - name: cisco.nxos
+  - name: arista.eos
+  - name: junipernetworks.junos
+  - name: ansible.netcommon
+  - name: ansible.network
+
+  # Windows
+  - name: ansible.windows
+  - name: community.windows
+
+  # RHEL system roles
+  - name: redhat.rhel_system_roles
+
+  # General utilities
+  - name: ansible.posix
+  - name: ansible.utils
+  - name: community.general
