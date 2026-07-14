@@ -1,0 +1,58 @@
+name: Test EE Builds
+
+on:
+  pull_request:
+    branches:
+      - main
+    types: [opened, reopened, synchronize]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-test-ees:
+    runs-on: ubuntu-latest
+    environment: test
+    strategy:
+      matrix:
+        ee:
+          - tests/test-ee-aap27-minimal
+          - tests/test-ee-aap26-minimal
+          - tests/test-ee-aap26-supported
+          - tests/test-ee-source-only-pkg
+      fail-fast: false
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Install ansible-builder
+        run: pip install -r requirements.txt
+
+      - name: Log in to registry.redhat.io
+        uses: redhat-actions/podman-login@v1
+        with:
+          registry: registry.redhat.io
+          username: ${{ secrets.REDHAT_SA_USERNAME }}
+          password: ${{ secrets.REDHAT_SA_PASSWORD }}
+
+      - name: Substitute token for automation hub
+        run: |
+          sed -i "s/my_ah_token/${{ secrets.AH_TOKEN }}/g" ansible.cfg
+
+      - name: Build test EE
+        working-directory: ${{ matrix.ee }}
+        run: |
+          ansible-builder build -v 3 \
+            --build-arg AH_TOKEN=${{ secrets.AH_TOKEN }} \
+            --tag=test-$(basename ${{ matrix.ee }}):${{ github.sha }}
+
+      - name: Verify image
+        run: |
+          IMAGE="test-$(basename ${{ matrix.ee }}):${{ github.sha }}"
+          echo "## Test: $(basename ${{ matrix.ee }})" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          podman run --rm $IMAGE python3 --version >> $GITHUB_STEP_SUMMARY
+          podman run --rm $IMAGE ansible --version >> $GITHUB_STEP_SUMMARY
+          podman run --rm $IMAGE ansible-galaxy collection list >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY

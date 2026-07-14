@@ -1,0 +1,5 @@
+---
+# Delta-only: ONLY collections NOT already in ee-supported-rhel9
+# Do NOT add cisco.ios, ansible.netcommon, ansible.utils, etc.
+collections:
+  - name: servicenow.itsm

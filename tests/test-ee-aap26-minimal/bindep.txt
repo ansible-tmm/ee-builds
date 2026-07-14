@@ -1,0 +1,2 @@
+python3.12-devel [compile platform:rhel-9]
+gcc [compile platform:rhel-9]

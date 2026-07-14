@@ -1,0 +1,32 @@
+---
+# TEST: AAP 2.6 ee-supported-rhel9 (delta-only deps)
+# Validates: Delta-only collections on ee-supported, version mismatch suppression
+# Rules tested: 04, 05
+version: 3
+images:
+  base_image:
+    name: registry.redhat.io/ansible-automation-platform-26/ee-supported-rhel9:latest
+
+dependencies:
+  galaxy: requirements.yml
+  system: bindep.txt
+
+additional_build_files:
+    - src: ansible.cfg
+      dest: configs
+
+options:
+    package_manager_path: /usr/bin/microdnf
+
+additional_build_steps:
+    prepend_base:
+        - ENV ANSIBLE_COLLECTIONS_ON_ANSIBLE_VERSION_MISMATCH=ignore
+    prepend_builder:
+        - ENV PYCMD=/usr/bin/python3.12
+    prepend_final:
+        - ENV PYCMD=/usr/bin/python3.12
+    prepend_galaxy:
+        - ADD _build/configs/ansible.cfg /etc/ansible/ansible.cfg
+        - ARG AH_TOKEN
+        - ENV ANSIBLE_GALAXY_SERVER_AUTOMATION_HUB_TOKEN=$AH_TOKEN
+        - ENV ANSIBLE_GALAXY_SERVER_AUTOMATION_HUB_VALIDATED_TOKEN=$AH_TOKEN

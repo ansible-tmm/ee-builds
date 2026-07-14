@@ -1,0 +1,34 @@
+---
+# TEST: pip build isolation with source-only package
+# Validates: pip<24 pin prevents PEP 517 build isolation failure
+# Rules tested: 02
+version: 3
+images:
+  base_image:
+    name: registry.redhat.io/ansible-automation-platform-26/ee-minimal-rhel9:latest
+
+dependencies:
+  galaxy: requirements.yml
+  python: requirements.txt
+  system: bindep.txt
+
+additional_build_files:
+    - src: ansible.cfg
+      dest: configs
+
+options:
+    package_manager_path: /usr/bin/microdnf
+
+additional_build_steps:
+    prepend_base:
+        # Pin pip below 24 to avoid PEP 517 build isolation
+        # Without this pin, systemd-python fails: "No module named setuptools"
+        - RUN $PYCMD -m pip install 'pip<24' setuptools
+    prepend_builder:
+        - ENV PYCMD=/usr/bin/python3.12
+    prepend_final:
+        - ENV PYCMD=/usr/bin/python3.12
+    prepend_galaxy:
+        - ADD _build/configs/ansible.cfg /etc/ansible/ansible.cfg
+        - ARG AH_TOKEN
+        - ENV ANSIBLE_GALAXY_SERVER_AUTOMATION_HUB_TOKEN=$AH_TOKEN
