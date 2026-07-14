@@ -24,6 +24,7 @@ additional_build_steps:
          - RUN microdnf install -y python3-pip && /usr/bin/python3 -m pip install --upgrade pip setuptools
     prepend_builder:
         - ENV PYCMD=/usr/bin/python3.12
+        - RUN $PYCMD -m pip install --upgrade pip setuptools requirements-parser bindep pyyaml distro packaging Parsley
     prepend_final:
         - ENV PYCMD=/usr/bin/python3.12
     prepend_galaxy:
