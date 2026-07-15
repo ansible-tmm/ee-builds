@@ -1,0 +1,28 @@
+---
+version: 3
+images:
+    base_image:
+        name: 'registry.redhat.io/ansible-automation-platform-25/de-minimal-rhel9:latest'
+
+additional_build_files:
+    - src: ansible.cfg
+      dest: configs
+
+dependencies:
+    galaxy: ansible-collections.yml
+    python: python-packages.txt
+    system: system-packages.txt
+
+options:
+    package_manager_path: /usr/bin/microdnf
+
+additional_build_steps:
+    prepend_base:
+        - ENV PIP_NO_BUILD_ISOLATION=1
+        - RUN $PYCMD -m pip install --upgrade pip setuptools
+    prepend_galaxy:
+        - ADD _build/configs/ansible.cfg /etc/ansible/ansible.cfg
+        - ARG AH_TOKEN
+        - ENV ANSIBLE_GALAXY_SERVER_AUTOMATION_HUB_TOKEN=$AH_TOKEN
+    append_final:
+        - RUN rm -f /etc/ansible/ansible.cfg
