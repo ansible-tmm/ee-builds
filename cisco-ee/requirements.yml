@@ -1,0 +1,4 @@
+---
+collections:
+  - name: cisco.catalystcenter
+  - name: cisco.meraki
