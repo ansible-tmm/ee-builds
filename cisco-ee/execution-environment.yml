@@ -6,6 +6,7 @@ images:
 
 dependencies:
   galaxy: requirements.yml
+  system: bindep.txt
 
 additional_build_files:
     - src: ansible.cfg
