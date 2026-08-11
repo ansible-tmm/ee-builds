@@ -2,7 +2,7 @@
 version: 3
 images:
   base_image:
-    name: registry.redhat.io/ansible-automation-platform-27/ee-minimal-rhel9:2.16
+    name: 'registry.redhat.io/ansible-automation-platform-26/ee-supported-rhel9:latest'
 
 dependencies:
   galaxy: requirements.yml
@@ -18,7 +18,7 @@ options:
 
 additional_build_steps:
     prepend_base:
-        - RUN microdnf install -y python3-pip && microdnf clean all
+        - RUN $PYCMD -m ensurepip
     prepend_galaxy:
         - ADD _build/configs/ansible.cfg /etc/ansible/ansible.cfg
         - ARG AH_TOKEN
