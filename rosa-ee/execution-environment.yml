@@ -18,7 +18,7 @@ options:
 
 additional_build_steps:
     prepend_base:
-        - RUN microdnf install -y python3-pip && python3 -m pip install --upgrade pip setuptools
+        - RUN $PYCMD -m ensurepip
     prepend_galaxy:
         - ADD _build/configs/ansible.cfg /etc/ansible/ansible.cfg
         - ARG AH_TOKEN
