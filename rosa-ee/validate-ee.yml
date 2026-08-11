@@ -1,0 +1,45 @@
+---
+- name: Validate ROSA EE tooling
+  hosts: localhost
+  gather_facts: false
+  tasks:
+    - name: Check rosa CLI
+      ansible.builtin.command: rosa version
+      register: rosa_ver
+      changed_when: false
+
+    - name: Check AWS CLI
+      ansible.builtin.command: aws --version
+      register: aws_ver
+      changed_when: false
+
+    - name: Check jq
+      ansible.builtin.command: jq --version
+      register: jq_ver
+      changed_when: false
+
+    - name: Check oc client
+      ansible.builtin.command: oc version --client
+      register: oc_ver
+      changed_when: false
+
+    - name: Check ROSA login (requires ROSA_TOKEN env var)
+      ansible.builtin.command: rosa login --token={{ lookup('env', 'ROSA_TOKEN') }}
+      register: rosa_login
+      changed_when: false
+      when: lookup('env', 'ROSA_TOKEN') | length > 0
+
+    - name: Check AWS identity (requires AWS credentials)
+      amazon.aws.aws_caller_info: {}
+      register: aws_id
+      when: lookup('env', 'AWS_ACCESS_KEY_ID') | length > 0
+
+    - name: Display results
+      ansible.builtin.debug:
+        msg:
+          - "rosa: {{ rosa_ver.stdout_lines[0] }}"
+          - "aws: {{ aws_ver.stdout }}"
+          - "jq: {{ jq_ver.stdout }}"
+          - "oc: {{ oc_ver.stdout_lines[0] }}"
+          - "rosa_login: {{ rosa_login.stdout | default('skipped - no ROSA_TOKEN') }}"
+          - "aws_identity: {{ aws_id.arn | default('skipped - no AWS creds') }}"

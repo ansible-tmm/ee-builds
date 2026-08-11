@@ -1,0 +1,30 @@
+---
+version: 3
+images:
+  base_image:
+    name: registry.redhat.io/ansible-automation-platform-27/ee-minimal-rhel9:latest
+
+dependencies:
+  galaxy: requirements.yml
+  python: requirements.txt
+  system: bindep.txt
+
+additional_build_files:
+    - src: ansible.cfg
+      dest: configs
+
+options:
+    package_manager_path: /usr/bin/microdnf
+
+additional_build_steps:
+    prepend_base:
+        - RUN microdnf install -y python3-pip && python3 -m pip install --upgrade pip setuptools
+    prepend_galaxy:
+        - ADD _build/configs/ansible.cfg /etc/ansible/ansible.cfg
+        - ARG AH_TOKEN
+        - ENV ANSIBLE_GALAXY_SERVER_AUTOMATION_HUB_TOKEN=$AH_TOKEN
+    append_final:
+        - RUN microdnf install -y unzip tar gzip jq && microdnf clean all
+        - RUN curl -sL "https://github.com/openshift/rosa/releases/latest/download/rosa_Linux_x86_64.tar.gz" | tar -xz -C /usr/local/bin rosa && chmod +x /usr/local/bin/rosa
+        - RUN curl -sL "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o /tmp/awscliv2.zip && unzip -q /tmp/awscliv2.zip -d /tmp && /tmp/aws/install && rm -rf /tmp/aws /tmp/awscliv2.zip
+        - RUN curl -sL "https://mirror.openshift.com/pub/openshift-v4/clients/ocp/stable/openshift-client-linux.tar.gz" | tar -xz -C /usr/local/bin oc kubectl && chmod +x /usr/local/bin/oc /usr/local/bin/kubectl
