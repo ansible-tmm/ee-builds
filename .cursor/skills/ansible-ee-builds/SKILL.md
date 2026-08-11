@@ -119,6 +119,32 @@ python3-pip    [platform:rhel-9] # microdnf can remove pip; ensure it's present
 - Automation Hub 504 timeouts are transient — rerun the workflow.
 - The workflow runs on merge to `main`. Use devel→main PRs.
 
+## RHEL 9 Crypto Policy and ssh-rsa
+
+RHEL 9's system crypto policy blocks `ssh-rsa` at the OS libssh C library
+level (`/etc/crypto-policies/back-ends/libssh.config`). This causes failures
+connecting to older network devices (e.g. Cisco IOS) that require `ssh-rsa`:
+
+```
+ssh connection failed: The key algorithm 'ssh-rsa' is not allowed to be used by PUBLICKEY_ACCEPTED_TYPES
+```
+
+Ansible-level config (`ansible.cfg`, ENV vars, host vars) cannot fix this —
+the OS rejects the algorithm before Ansible sees it.
+
+**Fix** — relax the crypto policy in `append_final`:
+
+```yaml
+append_final:
+    - RUN microdnf install -y crypto-policies-scripts && update-crypto-policies --set DEFAULT:SHA1 && microdnf clean all
+```
+
+Notes:
+- `crypto-policies-scripts` provides `update-crypto-policies` (not in base image)
+- `DEFAULT:SHA1` is a built-in RHEL 9 sub-policy — do NOT write custom `.pmod`
+  files with INI syntax (that's not the correct format)
+- The `.pmod` module format uses `key = value` without section headers
+
 ## Debugging Checklist
 
 When an EE build fails or produces runtime warnings:
@@ -128,3 +154,5 @@ When an EE build fails or produces runtime warnings:
 3. **`No module named pip`?** → Add `python3-pip` to bindep.txt + `RUN $PYCMD -m ensurepip` in prepend_base
 4. **Collection version warnings at runtime?** → Check if your build overwrites the base image's ansible.cfg; use ENV var in prepend_base instead
 5. **Collections pulling wrong versions?** → You're probably overriding base image collections in requirements.yml; trim to delta only
+6. **ssh-rsa / PUBLICKEY_ACCEPTED_TYPES error?** → RHEL 9 crypto policy blocks ssh-rsa at OS level; use `update-crypto-policies --set DEFAULT:SHA1` in append_final
+7. **`command not found` in append_final?** → Install the package first (e.g. `crypto-policies-scripts` for `update-crypto-policies`)
