@@ -12,7 +12,7 @@ Used by the Ansible Network Automation Workshop (rhpds/zt-network-automation-wor
 
 ## Base Image: ee-supported-rhel9
 
-Collections require `ansible-core>=2.17.0`. `ee-minimal-rhel9` (Python 3.9) can't satisfy this. `ee-supported-rhel9` (Python 3.12, ansible-core 2.15.x RPM) works with pre-bundled collections.
+Collections require `ansible-core>=2.17.0`. `ee-minimal-rhel9` (Python 3.9) can't satisfy this. `ee-supported-rhel9` (Python 3.9, ansible-core 2.15.x RPM) works with pre-bundled collections.
 
 ## Delta-Only Dependencies
 
@@ -20,10 +20,20 @@ Collections require `ansible-core>=2.17.0`. `ee-minimal-rhel9` (Python 3.9) can'
 
 ## Collection Version Mismatch Warnings (Fixed)
 
-The base image's collections declare support for ansible-core >=2.17 but the image ships 2.15.x. Red Hat suppresses the resulting warnings in the stock image's ansible.cfg. Our custom ansible.cfg (used for galaxy server URLs during build) replaces the stock one in the galaxy stage, but that stage is discarded — so the stock suppression survives in the final image.
+`ENV ANSIBLE_COLLECTIONS_ON_ANSIBLE_VERSION_MISMATCH=ignore` in `prepend_base` suppresses warnings from collections declaring `ansible-core>=2.17` while the image ships 2.15.x. Must be an ENV var in `prepend_base` (stage 1) — ansible.cfg changes in `prepend_galaxy` (stage 2) are discarded.
 
-If warnings reappear, set `ENV ANSIBLE_COLLECTIONS_ON_ANSIBLE_VERSION_MISMATCH=ignore` in `prepend_base` (persists to the final image). Do NOT rely on ansible.cfg changes in `prepend_galaxy` — that stage is thrown away.
+## RHEL 9 Crypto Policy — ssh-rsa (Fixed, Temporary)
+
+RHEL 9 blocks `ssh-rsa` at the OS libssh C library level via `/etc/crypto-policies/back-ends/libssh.config`. Cisco IOS devices require `ssh-rsa`, causing `PUBLICKEY_ACCEPTED_TYPES` errors. Ansible-level config (`ansible.cfg`, ENV vars, host vars) cannot override this — the OS rejects the algorithm before Ansible sees it.
+
+**Fix**: `update-crypto-policies --set DEFAULT:SHA1` in `append_final` (stage 4).
+
+**Deprecation plan**: This workaround should be removed once the workshop lab routers are upgraded to support modern key algorithms (e.g. `ecdsa-sha2-nistp256`). When removing, delete the `update-crypto-policies` line from `append_final` and optionally the `ANSIBLE_LIBSSH_PUBLICKEY_ALGORITHMS` ENV var from `prepend_base`.
 
 ## ansible.cfg
 
-The `ansible.cfg` in this directory configures Automation Hub galaxy servers. It is `ADD`ed in `prepend_galaxy` and used only during `ansible-galaxy collection install`. It does **not** exist in the final runtime image (see multi-stage build notes in ee-build-conventions rule).
+The `ansible.cfg` has two roles:
+1. **Build-time** (stage 2 via `prepend_galaxy`): Galaxy server URLs for Automation Hub access during `ansible-galaxy collection install`
+2. **Runtime** (stage 4 via `append_final`): `[defaults]` and `[libssh_connection]` settings
+
+Both stages need the `ADD` because stage 2 is discarded after collection install.
