@@ -1,0 +1,30 @@
+name: Test Red Hat SA Credentials
+
+on:
+  workflow_dispatch:
+
+jobs:
+  test-registry-login:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Log in to registry.redhat.io
+        uses: redhat-actions/podman-login@v1
+        with:
+          registry: registry.redhat.io
+          username: ${{ secrets.REDHAT_SA_USERNAME }}
+          password: ${{ secrets.REDHAT_SA_PASSWORD }}
+
+      - name: Verify pull access to an EE base image
+        run: |
+          set -euo pipefail
+          # Lightweight check: resolve manifest for a known public-to-entitled base image.
+          # Auth failure shows as unauthorized; success proves SA can reach registry.redhat.io.
+          IMAGE="registry.redhat.io/ansible-automation-platform-25/ee-minimal-rhel9:latest"
+          if skopeo inspect --override-os linux --override-arch amd64 "docker://${IMAGE}" >/tmp/inspect.json 2>/tmp/skopeo.err; then
+            echo "Inspect succeeded for ${IMAGE}"
+            python3 -c "import json; d=json.load(open('/tmp/inspect.json')); print('Digest:', d.get('Digest') or d.get('digest')); print('Name:', d.get('Name') or d.get('name'))"
+          else
+            echo "skopeo stderr:"
+            cat /tmp/skopeo.err
+            exit 1
+          fi
