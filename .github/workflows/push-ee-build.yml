@@ -61,8 +61,8 @@ jobs:
         uses: redhat-actions/podman-login@v1
         with:
           registry: quay.io
-          username: ${{ secrets.REDHAT_USERNAME }}
-          password: ${{ secrets.REDHAT_PASSWORD }}
+          username: ${{ secrets.QUAY_USERNAME }}
+          password: ${{ secrets.QUAY_PASSWORD }}
 
       - name: Log in to registry.redhat.io
         uses: redhat-actions/podman-login@v1
@@ -90,7 +90,7 @@ jobs:
           echo "EE: ${{ env.EE }}" >> $COMMANDS_FILE
           echo "" >> $COMMANDS_FILE
           echo "\`\`\`" > $COMMANDS_FILE
-          echo "podman pull quay.io/${{ secrets.QUAY_USER }}/${{ env.EE }}:${{ env.IMAGE_TAG }}" >> $COMMANDS_FILE
+          echo "podman pull quay.io/${{ secrets.QUAY_NAMESPACE }}/${{ env.EE }}:${{ env.IMAGE_TAG }}" >> $COMMANDS_FILE
           echo "\`\`\`" >> $COMMANDS_FILE
           echo "<details>" >> $COMMANDS_FILE
           echo "<summary><b>More info...</b></summary>" >> $COMMANDS_FILE
@@ -119,12 +119,12 @@ jobs:
         with:
           image: ${{ env.EE }}
           tags: ${{ env.IMAGE_TAG }} ${{ github.sha }}
-          registry: quay.io/${{ secrets.QUAY_USER }}/
-          username: ${{ secrets.REDHAT_USERNAME }}
-          password: ${{ secrets.REDHAT_PASSWORD }}
+          registry: quay.io/${{ secrets.QUAY_NAMESPACE }}/
+          username: ${{ secrets.QUAY_USERNAME }}
+          password: ${{ secrets.QUAY_PASSWORD }}
 
       - name: Print summary
         run: |
           echo "## :rocket: Usage" >> $GITHUB_STEP_SUMMARY
-          echo "Image pushed to repository: quay.io/${{ secrets.QUAY_USER }}/${{ env.EE }}:${{ env.IMAGE_TAG }}" >> $GITHUB_STEP_SUMMARY
-          echo "> \`podman pull quay.io/${{ secrets.QUAY_USER }}/${{ env.EE }}:${{ env.IMAGE_TAG }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "Image pushed to repository: quay.io/${{ secrets.QUAY_NAMESPACE }}/${{ env.EE }}:${{ env.IMAGE_TAG }}" >> $GITHUB_STEP_SUMMARY
+          echo "> \`podman pull quay.io/${{ secrets.QUAY_NAMESPACE }}/${{ env.EE }}:${{ env.IMAGE_TAG }}\`" >> $GITHUB_STEP_SUMMARY
