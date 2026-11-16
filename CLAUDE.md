@@ -184,8 +184,8 @@ Neither `ansible-builder` 3.0.0 nor 3.1.1 upgrades pip in the generated Containe
 ### Required secrets
 - `AH_TOKEN` — Red Hat Automation Hub offline token
 - `REDHAT_SA_USERNAME` / `REDHAT_SA_PASSWORD` — registry.redhat.io service account
-- `REDHAT_USERNAME` / `REDHAT_PASSWORD` — quay.io credentials
-- `QUAY_USER` — quay.io org/user namespace
+- `QUAY_USERNAME` / `QUAY_PASSWORD` — quay.io login credentials
+- `QUAY_NAMESPACE` — quay.io org/user namespace
 
 ### How CI detects what to build
 Only EE directories with changed files between the base and head refs are built. No workflow changes needed when adding a new EE — `generate_matrix.py` auto-detects directories with `execution-environment.yml`. Touch a file in an EE directory to force a rebuild. Automation Hub 504 timeouts are transient — just rerun the workflow.
