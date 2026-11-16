@@ -56,33 +56,33 @@ jobs:
         uses: redhat-actions/podman-login@v1
         with:
           registry: quay.io
-          username: ${{ secrets.REDHAT_USERNAME }}
-          password: ${{ secrets.REDHAT_PASSWORD }}
+          username: ${{ secrets.QUAY_USERNAME }}
+          password: ${{ secrets.QUAY_PASSWORD }}
 
       - name: Tag image with immutable version
         run: |
           skopeo copy \
-            "docker://quay.io/${QUAY_USER}/${EE_NAME}:${COMMIT_SHA}" \
-            "docker://quay.io/${QUAY_USER}/${EE_NAME}:v${VERSION}"
+            "docker://quay.io/${QUAY_NAMESPACE}/${EE_NAME}:${COMMIT_SHA}" \
+            "docker://quay.io/${QUAY_NAMESPACE}/${EE_NAME}:v${VERSION}"
         env:
-          QUAY_USER: ${{ secrets.QUAY_USER }}
+          QUAY_NAMESPACE: ${{ secrets.QUAY_NAMESPACE }}
 
       - name: Tag image with floating base version
         run: |
           skopeo copy \
-            "docker://quay.io/${QUAY_USER}/${EE_NAME}:${COMMIT_SHA}" \
-            "docker://quay.io/${QUAY_USER}/${EE_NAME}:v${BASE_VERSION}"
+            "docker://quay.io/${QUAY_NAMESPACE}/${EE_NAME}:${COMMIT_SHA}" \
+            "docker://quay.io/${QUAY_NAMESPACE}/${EE_NAME}:v${BASE_VERSION}"
         env:
-          QUAY_USER: ${{ secrets.QUAY_USER }}
+          QUAY_NAMESPACE: ${{ secrets.QUAY_NAMESPACE }}
 
       - name: Print summary
         env:
-          QUAY_USER: ${{ secrets.QUAY_USER }}
+          QUAY_NAMESPACE: ${{ secrets.QUAY_NAMESPACE }}
         run: |
           echo "## Tagged EE Image" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**EE:** ${EE_NAME}" >> $GITHUB_STEP_SUMMARY
-          echo "**Source:** \`quay.io/${QUAY_USER}/${EE_NAME}:${COMMIT_SHA}\`" >> $GITHUB_STEP_SUMMARY
+          echo "**Source:** \`quay.io/${QUAY_NAMESPACE}/${EE_NAME}:${COMMIT_SHA}\`" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**Tags applied:**" >> $GITHUB_STEP_SUMMARY
           echo "- \`v${VERSION}\` (immutable)" >> $GITHUB_STEP_SUMMARY
@@ -90,6 +90,6 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**Pull commands:**" >> $GITHUB_STEP_SUMMARY
           echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
-          echo "podman pull quay.io/${QUAY_USER}/${EE_NAME}:v${VERSION}" >> $GITHUB_STEP_SUMMARY
-          echo "podman pull quay.io/${QUAY_USER}/${EE_NAME}:v${BASE_VERSION}" >> $GITHUB_STEP_SUMMARY
+          echo "podman pull quay.io/${QUAY_NAMESPACE}/${EE_NAME}:v${VERSION}" >> $GITHUB_STEP_SUMMARY
+          echo "podman pull quay.io/${QUAY_NAMESPACE}/${EE_NAME}:v${BASE_VERSION}" >> $GITHUB_STEP_SUMMARY
           echo "\`\`\`" >> $GITHUB_STEP_SUMMARY

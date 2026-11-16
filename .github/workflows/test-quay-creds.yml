@@ -1,0 +1,42 @@
+name: Test Quay Credentials
+
+on:
+  workflow_dispatch:
+
+jobs:
+  test-quay-login:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Log in to quay.io
+        uses: redhat-actions/podman-login@v1
+        with:
+          registry: quay.io
+          username: ${{ secrets.QUAY_USERNAME }}
+          password: ${{ secrets.QUAY_PASSWORD }}
+
+      - name: Verify namespace is readable
+        env:
+          QUAY_NAMESPACE: ${{ secrets.QUAY_NAMESPACE }}
+        run: |
+          set -euo pipefail
+          if [ -z "${QUAY_NAMESPACE}" ]; then
+            echo "QUAY_NAMESPACE secret is empty"
+            exit 1
+          fi
+          echo "QUAY_NAMESPACE is set (${#QUAY_NAMESPACE} chars)"
+          # Confirm auth works against the namespace path (list tags / inspect repo API via skopeo)
+          # Use a well-known public path under the namespace if present; otherwise list fails with
+          # auth-related errors vs empty-secret errors.
+          if skopeo list-tags "docker://quay.io/${QUAY_NAMESPACE}/network-ee" >/tmp/tags.json 2>/tmp/skopeo.err; then
+            echo "Authenticated access to quay.io/${QUAY_NAMESPACE}/network-ee succeeded"
+            python3 -c "import json; d=json.load(open('/tmp/tags.json')); print('tag_count=', len(d.get('Tags', [])))"
+          else
+            echo "skopeo stderr:"
+            cat /tmp/skopeo.err
+            # Auth failures are hard fails; missing repo is still proof login+namespace path worked if not unauthorized
+            if rg -qi 'unauthorized|authentication required|denied|invalid username|access denied' /tmp/skopeo.err; then
+              echo "Quay auth/namespace check failed"
+              exit 1
+            fi
+            echo "Non-auth skopeo error (repo may be missing); login still succeeded above"
+          fi

@@ -1,24 +1,39 @@
-name: Refresh Red Hat Token (Leo)
+name: Refresh Automation Hub Token (AH_TOKEN)
 
 on:
   schedule:
-    # Approximate 25-day intervals with specific days of the month
-    - cron: "0 0 1,26 * *" # Runs on the 1st and 26th of every month at midnight UTC
+    # Approximate 25-day intervals (offline tokens expire after ~30 days unused)
+    - cron: "0 0 1,26 * *" # 1st and 26th of every month at midnight UTC
 
-  workflow_dispatch: # Allows manual runs as well
+  workflow_dispatch:
 
 jobs:
   refresh-token:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Refresh Red Hat Token (Leo)
+      - name: Keep AH_TOKEN offline token alive
         env:
-          REFRESH_TOKEN: ${{ secrets.AH_TOKEN }} # Add your refresh token as a secret
+          OFFLINE_TOKEN: ${{ secrets.AH_TOKEN }}
         run: |
-          echo "Refreshing token..."
-          curl "https://sso.redhat.com/auth/realms/redhat-external/protocol/openid-connect/token" \
+          set -euo pipefail
+          if [ -z "${OFFLINE_TOKEN}" ]; then
+            echo "AH_TOKEN secret is empty"
+            exit 1
+          fi
+
+          echo "Refreshing AH_TOKEN against Red Hat SSO..."
+          HTTP_CODE=$(curl -sS -o /tmp/token-response.json -w "%{http_code}" \
+            "https://sso.redhat.com/auth/realms/redhat-external/protocol/openid-connect/token" \
             -d grant_type=refresh_token \
             -d client_id="cloud-services" \
-            -d refresh_token="$AH_TOKEN" \
-            --fail --silent --show-error --output /dev/null
+            -d refresh_token="${OFFLINE_TOKEN}")
+
+          if [ "${HTTP_CODE}" != "200" ]; then
+            echo "SSO refresh failed with HTTP ${HTTP_CODE}"
+            # Show error keys only — never dump token material
+            python3 -c "import json; d=json.load(open('/tmp/token-response.json')); print({k:d[k] for k in d if k in ('error','error_description')})"
+            exit 1
+          fi
+
+          python3 -c "import json; d=json.load(open('/tmp/token-response.json')); assert 'access_token' in d; print('AH_TOKEN refresh succeeded')"
