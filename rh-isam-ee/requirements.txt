@@ -3,7 +3,7 @@ boto3 >= 1.18.0
 botocore >= 1.21.0
 ipaddr
 jmespath==0.10.0
-netaddr==0.10.1
+netaddr==1.3.0
 paramiko==5.1.0
 passlib
 petname==2.6
