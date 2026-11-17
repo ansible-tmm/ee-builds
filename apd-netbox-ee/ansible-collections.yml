@@ -1,0 +1,11 @@
+---
+collections:
+
+## NetBox Security Inventory source, seeding, and evidence writeback (pinned)
+  - name: netbox.netbox
+    version: 3.23.1
+
+## Device network_cli transport and cisco.ios adapter (unpinned: newest
+## versions compatible with the base's ansible-core 2.16 resolve here)
+  - name: cisco.ios
+  - name: ansible.netcommon

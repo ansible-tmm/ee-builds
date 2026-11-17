@@ -1,0 +1,6 @@
+# NetBox API client and SSH transport for network_cli device access.
+# netbox.netbox 3.23.1 also declares pynetbox via the collection itself;
+# packaging/pytz/ncclient are provided by the collection metadata or the
+# base image and are re-checked during post-build verification.
+pynetbox
+paramiko
