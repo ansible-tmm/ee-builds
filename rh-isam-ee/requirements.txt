@@ -1,6 +1,4 @@
 cryptography==50.0.2
-# azure.azcollection pulls azure-identity which otherwise resolves msal with cryptography<48
-msal>=1.39.0
 boto3 >= 1.18.0
 botocore >= 1.21.0
 ipaddr
