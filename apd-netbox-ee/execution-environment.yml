@@ -1,0 +1,41 @@
+---
+# apd-netbox-ee — NetBox Network Security demo EE (EE-B).
+# NetBox/inventory/device-security runtime for the APD NetBox Network Security
+# demo: netbox.netbox inventory + modules, device network_cli access.
+# AWS/AAP/EDA-side jobs run on EE-A (Red Hat ee-supported-rhel9, zero build).
+# Base: AAP 2.7 ee-minimal-rhel9 core-2.16 line, tag 2.16 (build 2026-10-30,
+# ansible-core 2.16.19, Python 3.12.15); observed digest:
+# sha256:f8309f49c66f0080b371b33de3853b97c3c290c54855ef2cc8d81217c18d8186
+version: 3
+images:
+  base_image:
+    name: registry.redhat.io/ansible-automation-platform-27/ee-minimal-rhel9:2.16
+
+dependencies:
+  galaxy: ansible-collections.yml
+  python: python-packages.txt
+
+additional_build_files:
+    # Can be used to resolve collections from private automation hub
+    - src: ansible.cfg
+      dest: configs
+
+options:
+    package_manager_path: /usr/bin/microdnf
+
+additional_build_steps:
+    prepend_builder:
+        - ENV PYCMD=/usr/bin/python3.12
+        - RUN $PYCMD -m pip install --upgrade pip setuptools requirements-parser bindep pyyaml distro packaging Parsley
+    prepend_final:
+        - ENV PYCMD=/usr/bin/python3.12
+    prepend_galaxy:
+        # Add custom ansible.cfg which defines collection install sources
+        - ADD _build/configs/ansible.cfg /etc/ansible/ansible.cfg
+        # AH_TOKEN is passed into the build command using a --build-arg
+        # accept this as an ARG during this stage to reference later
+        - ARG AH_TOKEN
+        # Set the token for BOTH published and validated servers, otherwise
+        # collections from the validated content repo fail with HTTP 400
+        - ENV ANSIBLE_GALAXY_SERVER_AUTOMATION_HUB_TOKEN=$AH_TOKEN
+        - ENV ANSIBLE_GALAXY_SERVER_AUTOMATION_HUB_VALIDATED_TOKEN=$AH_TOKEN
