@@ -17,7 +17,10 @@ options:
 
 additional_build_steps:
   prepend_base:
-    - RUN $PYCMD -m pip install --upgrade pip setuptools
+    # Ignore RPM-installed packages so pip can overlay patched wheels
+    - ENV PIP_IGNORE_INSTALLED=1
+    # Keep pip below 24 to avoid PEP 517 build-isolation failures
+    - RUN $PYCMD -m pip install --upgrade 'pip<24' setuptools
 #    - COPY _build/rpms/*.rpm /tmp/openshift-clients.rpm
 #    - RUN $PKGMGR install bash-completion
     - RUN git clone --branch ee-build-source-aap2-24 https://github.com/redhat-partner-tech/automated-smart-management.git
