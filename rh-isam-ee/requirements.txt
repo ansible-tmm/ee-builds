@@ -1,5 +1,4 @@
 cryptography==50.0.2
-ansible[azure] >= 2.0.0
 boto3 >= 1.18.0
 botocore >= 1.21.0
 ipaddr
